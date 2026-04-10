@@ -1,0 +1,114 @@
+.input-bar-wrapper {
+  padding: 0 24px 20px;
+  max-width: 720px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.input-bar {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  padding: 6px 6px 6px 18px;
+  box-shadow: var(--shadow-md);
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+.input-bar:focus-within {
+  border-color: rgba(0, 113, 227, 0.4);
+  box-shadow: var(--shadow-md), 0 0 0 3px rgba(0, 113, 227, 0.08);
+}
+
+.input-bar__field {
+  flex: 1;
+  border: none;
+  outline: none;
+  resize: none;
+  background: transparent;
+  font-size: 15px;
+  line-height: 1.5;
+  padding: 8px 0;
+  color: var(--text-primary);
+  max-height: 120px;
+}
+
+.input-bar__field::placeholder {
+  color: var(--text-tertiary);
+}
+
+.input-bar__field:disabled {
+  opacity: 0.5;
+}
+
+.input-bar__mic {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  border: none;
+  background: transparent;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all var(--transition);
+}
+
+.input-bar__mic:hover {
+  color: var(--text-primary);
+  background: var(--surface-secondary);
+}
+
+.input-bar__mic--active {
+  color: #ef4444;
+  animation: pulse-mic 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse-mic {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.input-bar__mic:disabled {
+  cursor: default;
+  opacity: 0.4;
+}
+
+.input-bar__send {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  border: none;
+  background: var(--surface-secondary);
+  color: var(--text-tertiary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all var(--transition);
+}
+
+.input-bar__send--active {
+  background: var(--text-primary);
+  color: #fff;
+}
+
+.input-bar__send--active:hover {
+  background: #333;
+}
+
+.input-bar__send:disabled {
+  cursor: default;
+}
+
+.input-bar__hint {
+  text-align: center;
+  font-size: 11px;
+  color: var(--text-tertiary);
+  margin-top: 10px;
+}
