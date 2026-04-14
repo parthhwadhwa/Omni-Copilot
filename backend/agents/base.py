@@ -43,7 +43,6 @@ class BaseAgent:
         return datetime.now().isoformat(timespec="seconds")
 
     def tool_definitions(self) -> list[dict]:
-        """Return MCP-compatible tool definitions."""
         return [
             {
                 "name": f"{self.name}.{t['action']}",

@@ -7,6 +7,9 @@ from .notion import NotionAgent
 from .meeting import MeetingAgent
 from .file import FileAgent
 from .forms import FormsAgent
+from .drive import DriveAgent
+from .github import GitHubAgent
+from .code import CodeAgent
 
 ALL_AGENTS = {
     "mail": MailAgent,
@@ -18,4 +21,7 @@ ALL_AGENTS = {
     "meeting": MeetingAgent,
     "file": FileAgent,
     "forms": FormsAgent,
+    "drive": DriveAgent,
+    "github": GitHubAgent,
+    "code": CodeAgent,
 }

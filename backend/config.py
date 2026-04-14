@@ -1,8 +1,7 @@
-"""Load environment variables from .env file."""
-
 import os
 
-_ENV_FILE = os.path.join(os.path.dirname(__file__), ".env")
+_ENV_FILE = os.path.join(os.path.dirname(__file__), "..", ".env")
+
 
 def _load_env():
     if not os.path.exists(_ENV_FILE):
@@ -17,6 +16,7 @@ def _load_env():
             if val and key not in os.environ:
                 os.environ[key] = val
 
+
 _load_env()
 
 EMAIL_USER = os.environ.get("EMAIL_USER", "")
@@ -25,3 +25,8 @@ GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "")
 SLACK_WEBHOOK_URL = os.environ.get("SLACK_WEBHOOK_URL", "")
 DISCORD_WEBHOOK_URL = os.environ.get("DISCORD_WEBHOOK_URL", "")
 NOTION_TOKEN = os.environ.get("NOTION_TOKEN", "")
+GOOGLE_SERVICE_ACCOUNT_FILE = os.environ.get("GOOGLE_SERVICE_ACCOUNT_FILE", "")
+ZOOM_ACCOUNT_ID = os.environ.get("ZOOM_ACCOUNT_ID", "")
+ZOOM_CLIENT_ID = os.environ.get("ZOOM_CLIENT_ID", "")
+ZOOM_CLIENT_SECRET = os.environ.get("ZOOM_CLIENT_SECRET", "")
+GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN", "")

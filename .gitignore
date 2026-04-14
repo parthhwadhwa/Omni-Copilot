@@ -1,49 +1,33 @@
-# ── Secrets ───────────────────────────────────────────────────────────────────
+# Secrets
 .env
+*.json
+!frontend/package.json
+!frontend/package-lock.json
 *.pem
 *.key
-*.p12
-secrets/
 
-# ── Python ────────────────────────────────────────────────────────────────────
+# Python
 venv/
 __pycache__/
 *.py[cod]
-*.pyo
 *.egg-info/
-.eggs/
-dist/
-build/
-*.so
-.Python
 
-# ── Data files (local storage, not for version control) ───────────────────────
-data/
-sandbox/
-docs/
+# Local data storage
+backend/data/
+backend/docs/
 
-# ── Node / Frontend ───────────────────────────────────────────────────────────
-node_modules/
+# Node / Frontend
 frontend/node_modules/
 frontend/dist/
 frontend/.env
-frontend/.env.local
 
-# ── macOS ─────────────────────────────────────────────────────────────────────
+# macOS
 .DS_Store
-.AppleDouble
-.LSOverride
 
-# ── Claude Code local memory ──────────────────────────────────────────────────
+# IDE / Claude
 .claude/
-
-# ── IDE ───────────────────────────────────────────────────────────────────────
 .vscode/
 .idea/
 *.swp
-*.swo
-
-# ── Logs / temp ───────────────────────────────────────────────────────────────
 *.log
 *.tmp
-.cache/

@@ -1,22 +1,21 @@
 #!/bin/bash
-# Start both backend and frontend dev servers
+# Start backend and frontend
 
-trap 'kill 0' EXIT
+ROOT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
-echo "Starting Omni Copilot..."
-echo ""
+echo "Starting backend..."
+cd "$ROOT_DIR/backend"
+"$ROOT_DIR/venv/bin/uvicorn" server:app --reload --port 8000 &
+BACKEND_PID=$!
 
-# Backend
-cd "$(dirname "$0")"
-./venv/bin/uvicorn server:app --reload --port 8000 &
-echo "[backend]  http://localhost:8000"
+echo "Starting frontend..."
+cd "$ROOT_DIR/frontend"
+npm run dev &
+FRONTEND_PID=$!
 
-# Frontend
-cd frontend
-npm run dev -- --port 5173 &
-echo "[frontend] http://localhost:5173"
+echo "Backend:  http://localhost:8000"
+echo "Frontend: http://localhost:5173"
+echo "Press Ctrl+C to stop."
 
-echo ""
-echo "Ready."
-
+trap "kill $BACKEND_PID $FRONTEND_PID" EXIT
 wait

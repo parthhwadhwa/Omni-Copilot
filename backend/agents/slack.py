@@ -13,7 +13,7 @@ class SlackAgent(BaseAgent):
             "params": {
                 "type": "object",
                 "properties": {
-                    "channel": {"type": "string", "description": "Channel name (e.g. general)"},
+                    "channel": {"type": "string", "description": "Channel name", "default": "general"},
                     "text": {"type": "string"},
                 },
                 "required": ["channel", "text"],
