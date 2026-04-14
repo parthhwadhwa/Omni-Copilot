@@ -274,6 +274,19 @@ class MeetingAgent(BaseAgent):
         meetings.append(record)
         save_data("meetings.json", meetings)
 
+    def action_status(self) -> dict:
+        from .auth_google import get_access_token
+        from config import ZOOM_CLIENT_ID
+        token = get_access_token()
+        methods = []
+        if token:
+            methods.append("Google Meet")
+        if ZOOM_CLIENT_ID:
+            methods.append("Zoom")
+        if methods:
+            return {"connected": True, "method": ", ".join(methods)}
+        return {"connected": False, "setup": "Add Google OAuth or Zoom credentials to .env"}
+
     def action_list(self, limit: int = 10) -> list:
         meetings = load_data("meetings.json")
         meetings.sort(key=lambda m: m.get("start", ""))

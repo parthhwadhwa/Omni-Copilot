@@ -66,6 +66,12 @@ class MailAgent(BaseAgent):
         },
     ]
 
+    def action_status(self) -> dict:
+        from config import EMAIL_USER, EMAIL_PASS
+        if EMAIL_USER and EMAIL_PASS:
+            return {"connected": True, "method": "IMAP/SMTP", "account": EMAIL_USER}
+        return {"connected": False, "setup": "Add EMAIL_USER and EMAIL_PASS to .env"}
+
     def action_send(self, to: str, subject: str, body: str) -> dict:
         from config import EMAIL_USER, EMAIL_PASS
 

@@ -294,6 +294,12 @@ def _validate_and_fill(params: dict, agent_name: str, action: str,
     if "start" in keys and not params.get("start"):
         params["start"] = f"{datetime.now().date().isoformat()}T{DEFAULTS['time']}"
 
+    # Default "to" for mail/send to the user's own email when not specified
+    if "to" in keys and not params.get("to"):
+        from config import EMAIL_USER
+        if EMAIL_USER:
+            params["to"] = EMAIL_USER
+
     return [k for k in required if not params.get(k)]
 
 
@@ -332,6 +338,24 @@ def _format_value(key: str, val) -> str:
     return str(val)
 
 
+def _success_header(res: dict) -> str:
+    """Return a one-line success headline based on what keys are in the result."""
+    if res.get("smtp_sent"):
+        return "Email sent successfully."
+    if res.get("status") == "sent":
+        return "Email sent."
+    if res.get("link") and res.get("platform"):
+        platform = str(res["platform"]).replace("_", " ").title()
+        return f"{platform} meeting scheduled."
+    if res.get("link") and "calendar" in str(res.get("storage", "")):
+        return "Meeting scheduled."
+    if res.get("status") in ("created", "written"):
+        return f"{str(res.get('status', '')).capitalize()}."
+    if res.get("status") == "scheduled":
+        return "Meeting scheduled."
+    return ""
+
+
 def _build_reply(results: list[dict]) -> str:
     ok = [r for r in results if r.get("ok")]
     failed = [r for r in results if not r.get("ok")]
@@ -348,7 +372,7 @@ def _build_reply(results: list[dict]) -> str:
         if isinstance(res, dict):
             if not res:
                 continue
-            # Check if it's a connection status response
+            # Connection status response
             if "connected" in res:
                 method = res.get("method", "")
                 state = "connected" if res.get("connected") else "not connected"
@@ -357,45 +381,46 @@ def _build_reply(results: list[dict]) -> str:
                     parts.append(f"Setup: {res['setup']}")
                 continue
 
-            # Generic key-value formatting
+            # Build key-value lines using markdown line breaks (two trailing spaces)
+            header = _success_header(res)
             lines = []
             for k, v in res.items():
                 if k in _REPLY_SKIP or not v or str(v).startswith("saved_locally"):
                     continue
                 label = _FIELD_LABELS.get(k, k.replace("_", " ").title())
-                lines.append(f"  {label}: {_format_value(k, v)}")
+                lines.append(f"- **{label}:** {_format_value(k, v)}")
             if lines:
-                parts.append("\n".join(lines))
+                block = "\n".join(lines)
+                parts.append(f"{header}\n\n{block}" if header else block)
+            elif header:
+                parts.append(header)
 
         elif isinstance(res, list):
             if not res:
                 parts.append("Nothing found.")
                 continue
-            # Find the best label field from the first item
             first = res[0] if isinstance(res[0], dict) else {}
             label_key = next(
                 (k for k in ("title", "name", "subject", "from", "path") if first.get(k)),
                 None,
             )
-            header = f"{len(res)} item(s):"
             bullets = []
             for item in res:
                 if isinstance(item, dict):
                     primary = item.get(label_key, "") if label_key else ""
                     secondary = ""
-                    # Attach a secondary detail if available
                     for sk in ("start", "date", "snippet", "url", "link"):
                         if item.get(sk):
                             secondary = f" — {_format_value(sk, item[sk])}"
                             break
-                    bullets.append(f"• {primary or str(item)}{secondary}")
+                    bullets.append(f"- {primary or str(item)}{secondary}")
                 else:
-                    bullets.append(f"• {item}")
-            parts.append(header + "\n" + "\n".join(bullets))
+                    bullets.append(f"- {item}")
+            parts.append(f"**{len(res)} result(s)**\n\n" + "\n".join(bullets))
 
     if failed:
-        parts.append(f"({len(failed)} step(s) failed: " +
-                     "; ".join(r.get("error", "?") for r in failed) + ")")
+        parts.append(f"*{len(failed)} step(s) failed: " +
+                     "; ".join(r.get("error", "?") for r in failed) + "*")
 
     return "\n\n".join(parts) if parts else "Done."
 

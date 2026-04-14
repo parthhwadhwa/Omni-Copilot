@@ -1,10 +1,12 @@
 import os
 from .base import BaseAgent
 
+DEFAULT_DIR = os.path.expanduser("~")
+
 
 class FileAgent(BaseAgent):
     name = "file"
-    description = "Read and write local code/text files and handle images"
+    description = "Read and list files from the local filesystem"
     tools = [
         {
             "action": "read",
@@ -12,21 +14,9 @@ class FileAgent(BaseAgent):
             "params": {
                 "type": "object",
                 "properties": {
-                    "path": {"type": "string"},
+                    "path": {"type": "string", "description": "Absolute file path"},
                 },
                 "required": ["path"],
-            },
-        },
-        {
-            "action": "write",
-            "description": "Write content to a file",
-            "params": {
-                "type": "object",
-                "properties": {
-                    "path": {"type": "string"},
-                    "content": {"type": "string"},
-                },
-                "required": ["path", "content"],
             },
         },
         {
@@ -35,38 +25,49 @@ class FileAgent(BaseAgent):
             "params": {
                 "type": "object",
                 "properties": {
-                    "path": {"type": "string", "default": "."},
+                    "path": {"type": "string", "description": "Directory path", "default": "~"},
                 },
             },
         },
+        {
+            "action": "status",
+            "description": "Check file agent status",
+            "params": {"type": "object", "properties": {}},
+        },
     ]
 
-    SANDBOX = os.path.join(os.path.dirname(os.path.dirname(__file__)), "sandbox")
-
-    def _safe_path(self, path: str) -> str:
-        os.makedirs(self.SANDBOX, exist_ok=True)
-        resolved = os.path.realpath(os.path.join(self.SANDBOX, path))
-        if not resolved.startswith(os.path.realpath(self.SANDBOX)):
-            raise ValueError("Path escapes sandbox")
-        return resolved
+    def action_status(self) -> dict:
+        return {"connected": True, "method": "local filesystem", "root": DEFAULT_DIR}
 
     def action_read(self, path: str) -> dict:
-        full = self._safe_path(path)
-        if not os.path.exists(full):
+        path = os.path.expanduser(path)
+        if not os.path.exists(path):
             return {"error": "File not found", "path": path}
-        with open(full) as f:
-            content = f.read()
-        return {"path": path, "content": content, "size": len(content)}
+        if not os.path.isfile(path):
+            return {"error": "Not a file", "path": path}
+        try:
+            with open(path, "r", encoding="utf-8", errors="replace") as f:
+                content = f.read()
+            return {"path": path, "content": content, "size": len(content)}
+        except Exception as e:
+            return {"error": str(e), "path": path}
 
-    def action_write(self, path: str, content: str) -> dict:
-        full = self._safe_path(path)
-        os.makedirs(os.path.dirname(full), exist_ok=True)
-        with open(full, "w") as f:
-            f.write(content)
-        return {"path": path, "status": "written", "size": len(content)}
-
-    def action_list_dir(self, path: str = ".") -> list:
-        full = self._safe_path(path)
-        if not os.path.isdir(full):
-            return []
-        return sorted(os.listdir(full))
+    def action_list_dir(self, path: str = "~") -> list:
+        path = os.path.expanduser(path)
+        if not path or path in (".", "current directory", "current dir"):
+            path = DEFAULT_DIR
+        if not os.path.isdir(path):
+            return [{"error": f"Directory not found: {path}"}]
+        try:
+            entries = []
+            for name in sorted(os.listdir(path)):
+                full = os.path.join(path, name)
+                entries.append({
+                    "name": name,
+                    "path": full,
+                    "type": "directory" if os.path.isdir(full) else "file",
+                    "size": os.path.getsize(full) if os.path.isfile(full) else None,
+                })
+            return entries[:50]
+        except Exception as e:
+            return [{"error": str(e)}]

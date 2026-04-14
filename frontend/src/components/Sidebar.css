@@ -76,6 +76,12 @@
   padding: 12px 8px 6px;
 }
 
+.sidebar__scroll {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
+
 .sidebar__agents,
 .sidebar__commands {
   display: flex;
@@ -83,9 +89,8 @@
   gap: 1px;
 }
 
-.sidebar__agents {
-  flex: 1;
-  overflow-y: auto;
+.sidebar__history {
+  max-height: unset;
 }
 
 .sidebar__agent {
@@ -224,6 +229,81 @@
 .sidebar__version {
   font-size: 11px;
   color: var(--text-tertiary);
+}
+
+/* Chat history */
+.sidebar__history {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin-bottom: 4px;
+}
+
+.sidebar__history-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background var(--transition);
+  position: relative;
+  min-width: 0;
+}
+
+.sidebar__history-item:hover {
+  background: var(--surface-secondary);
+}
+
+.sidebar__history-item--active {
+  background: var(--surface-secondary);
+}
+
+.sidebar__history-title {
+  font-size: 12px;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  min-width: 0;
+}
+
+.sidebar__history-item--active .sidebar__history-title {
+  font-weight: 500;
+}
+
+.sidebar__history-date {
+  font-size: 10px;
+  color: var(--text-tertiary);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.sidebar__history-delete {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-tertiary);
+  padding: 2px;
+  border-radius: 4px;
+  line-height: 0;
+  flex-shrink: 0;
+  transition: color var(--transition);
+}
+
+.sidebar__history-item:hover .sidebar__history-delete {
+  display: flex;
+  align-items: center;
+}
+
+.sidebar__history-delete:hover {
+  color: #ff3b30;
+}
+
+.sidebar__history-item:hover .sidebar__history-date {
+  display: none;
 }
 
 /* Status panel */

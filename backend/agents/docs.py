@@ -137,6 +137,9 @@ class DocsAgent(BaseAgent):
             "timestamp": self._now(),
         }
 
+    def action_status(self) -> dict:
+        return {"connected": True, "method": "local storage"}
+
     def action_list_files(self, query: str = "", limit: int = 10) -> list:
         docs = load_data("docs.json")
         if query:

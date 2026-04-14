@@ -152,15 +152,25 @@
 .result-cards {
   display: flex;
   flex-direction: column;
-  gap: 4px;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   overflow: hidden;
 }
 
+.result-cards__header {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  padding: 6px 12px;
+  background: var(--surface-secondary);
+  border-bottom: 1px solid var(--border);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
 .result-card {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   gap: 12px;
   padding: 8px 12px;

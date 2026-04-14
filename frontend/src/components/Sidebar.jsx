@@ -164,8 +164,22 @@ function useAgentStatus() {
   return { status, open, setOpen };
 }
 
-export default function Sidebar({ open, onToggle, onClear, autoMode, onAutoModeToggle, onSend, theme, onThemeToggle }) {
+function formatSessionDate(ts) {
+  const d = new Date(ts);
+  const now = new Date();
+  const diffDays = Math.floor((now - d) / 86400000);
+  if (diffDays === 0) return "Today";
+  if (diffDays === 1) return "Yesterday";
+  if (diffDays < 7) return d.toLocaleDateString([], { weekday: "long" });
+  return d.toLocaleDateString([], { month: "short", day: "numeric" });
+}
+
+export default function Sidebar({ open, onToggle, onNewChat, sessions = [], activeSessionId, onLoadSession, onDeleteSession, autoMode, onAutoModeToggle, onSend, theme, onThemeToggle }) {
   const agentStatus = useAgentStatus();
+  const [historyOpen, setHistoryOpen] = useState(true);
+
+  // Reverse so newest is first
+  const sortedSessions = [...sessions].reverse();
 
   return (
     <>
@@ -179,40 +193,74 @@ export default function Sidebar({ open, onToggle, onClear, autoMode, onAutoModeT
           </div>
         </div>
 
-        <button className="sidebar__new-chat" onClick={onClear}>
+        <button className="sidebar__new-chat" onClick={onNewChat}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
             <path d="M12 5v14M5 12h14" />
           </svg>
           New Chat
         </button>
 
-        <div className="sidebar__section-label">Agents</div>
-        <nav className="sidebar__agents">
-          {AGENTS.map((a) => (
-            <button
-              key={a.key}
-              className="sidebar__agent"
-              onClick={() => onSend?.(a.query)}
-            >
-              <span className="sidebar__agent-icon">{ICONS[a.icon]}</span>
-              <span className="sidebar__agent-label">{a.label}</span>
-            </button>
-          ))}
-        </nav>
+        <div className="sidebar__scroll">
+          {/* Chat history */}
+          <button
+            className="sidebar__section-label sidebar__status-toggle"
+            onClick={() => setHistoryOpen(!historyOpen)}
+          >
+            Chats
+            <span className={`sidebar__status-arrow ${historyOpen ? "sidebar__status-arrow--open" : ""}`}>▾</span>
+          </button>
+          {historyOpen && (
+            <nav className="sidebar__history">
+              {sortedSessions.map((s) => (
+                <div
+                  key={s.id}
+                  className={`sidebar__history-item ${s.id === activeSessionId ? "sidebar__history-item--active" : ""}`}
+                  onClick={() => onLoadSession(s.id)}
+                >
+                  <span className="sidebar__history-title">{s.title || "New Chat"}</span>
+                  <span className="sidebar__history-date">{formatSessionDate(s.createdAt)}</span>
+                  <button
+                    className="sidebar__history-delete"
+                    onClick={(e) => { e.stopPropagation(); onDeleteSession(s.id); }}
+                    title="Delete"
+                  >
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                      <path d="M18 6 6 18M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+              ))}
+            </nav>
+          )}
 
-        <div className="sidebar__section-label">Quick Commands</div>
-        <nav className="sidebar__commands">
-          {COMMANDS.map((c) => (
-            <button
-              key={c.cmd}
-              className="sidebar__command"
-              onClick={() => onSend?.(c.cmd)}
-            >
-              <span className="sidebar__command-key">{c.cmd}</span>
-              <span className="sidebar__command-desc">{c.desc}</span>
-            </button>
-          ))}
-        </nav>
+          <div className="sidebar__section-label">Agents</div>
+          <nav className="sidebar__agents">
+            {AGENTS.map((a) => (
+              <button
+                key={a.key}
+                className="sidebar__agent"
+                onClick={() => onSend?.(a.query)}
+              >
+                <span className="sidebar__agent-icon">{ICONS[a.icon]}</span>
+                <span className="sidebar__agent-label">{a.label}</span>
+              </button>
+            ))}
+          </nav>
+
+          <div className="sidebar__section-label">Quick Commands</div>
+          <nav className="sidebar__commands">
+            {COMMANDS.map((c) => (
+              <button
+                key={c.cmd}
+                className="sidebar__command"
+                onClick={() => onSend?.(c.cmd)}
+              >
+                <span className="sidebar__command-key">{c.cmd}</span>
+                <span className="sidebar__command-desc">{c.desc}</span>
+              </button>
+            ))}
+          </nav>
+        </div>
 
         <button
           className="sidebar__section-label sidebar__status-toggle"

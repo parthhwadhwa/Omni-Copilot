@@ -53,16 +53,31 @@ const LABEL_KEYS = ["title", "name", "subject", "from", "path", "full_name"];
 const SECONDARY_KEYS = ["start", "date", "snippet", "url", "link", "description", "body"];
 
 function formatVal(key, val) {
-  if ((key === "start" || key === "date") && typeof val === "string" && val.includes("T")) {
-    const [d, t] = val.split("T");
+  if (!val) return "";
+  const s = String(val);
+
+  // ISO datetime: 2026-04-15T10:00:00
+  if ((key === "start" || key === "date") && s.includes("T")) {
+    const [d, t] = s.split("T");
     try {
       const time = new Date(`1970-01-01T${t}`).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
       return `${d} · ${time}`;
-    } catch {
-      return val;
+    } catch { return s; }
+  }
+
+  // RFC 2822 / email date: "Tue, 14 Apr 2026 08:54:46 -0700 (PDT)"
+  if (key === "date" || key === "snippet") {
+    // Strip trailing timezone name "(PDT)" before parsing
+    const cleaned = s.replace(/\s*\([^)]*\)\s*$/, "").trim();
+    const d = new Date(cleaned);
+    if (!isNaN(d.getTime())) {
+      return d.toLocaleDateString([], { month: "short", day: "numeric" }) +
+        " · " + d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
     }
   }
-  return String(val);
+
+  // Truncate long strings
+  return s.length > 60 ? s.slice(0, 57) + "…" : s;
 }
 
 function ResultCards({ results }) {
@@ -77,16 +92,23 @@ function ResultCards({ results }) {
       {lists.map((list, li) => {
         const first = typeof list[0] === "object" ? list[0] : {};
         const labelKey = LABEL_KEYS.find((k) => first[k]);
-        const secondKey = SECONDARY_KEYS.find((k) => first[k] && k !== labelKey);
+        // Only pick a secondary key that has a parseable/useful value
+        const secondKey = SECONDARY_KEYS.find((k) => {
+          if (!first[k] || k === labelKey) return false;
+          const formatted = formatVal(k, first[k]);
+          return formatted && !formatted.startsWith("Invalid");
+        });
 
         return (
           <div key={li} className="result-cards">
+            <div className="result-cards__header">{list.length} result{list.length !== 1 ? "s" : ""}</div>
             {list.slice(0, 8).map((item, i) => {
               if (typeof item !== "object") {
                 return <div key={i} className="result-card result-card--simple">{String(item)}</div>;
               }
               const label = labelKey ? item[labelKey] : Object.values(item)[0];
               const secondary = secondKey ? item[secondKey] : null;
+              const secondaryFormatted = secondary ? formatVal(secondKey, secondary) : null;
               const link = item.url || item.link || item.html_url;
               return (
                 <div key={i} className="result-card">
@@ -95,10 +117,8 @@ function ResultCards({ results }) {
                       <a href={link} target="_blank" rel="noreferrer">{label}</a>
                     ) : label}
                   </span>
-                  {secondary && (
-                    <span className="result-card__secondary">
-                      {formatVal(secondKey, secondary)}
-                    </span>
+                  {secondaryFormatted && !secondaryFormatted.startsWith("Invalid") && (
+                    <span className="result-card__secondary">{secondaryFormatted}</span>
                   )}
                 </div>
               );
@@ -111,6 +131,10 @@ function ResultCards({ results }) {
       })}
     </>
   );
+}
+
+function hasListResults(results) {
+  return results?.some((r) => r.ok && Array.isArray(r.result) && r.result.length > 0);
 }
 
 function formatTime(ts) {
@@ -131,7 +155,7 @@ export default function MessageBubble({ message }) {
         </div>
       ) : (
         <div className="bubble__results">
-          {message.reply && (
+          {message.reply && !hasListResults(message.content) && (
             <div className="bubble__reply">
               <ReactMarkdown>{message.reply}</ReactMarkdown>
             </div>

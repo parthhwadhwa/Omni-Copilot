@@ -4,7 +4,6 @@ Works on the local filesystem. Supports all common code file types.
 """
 
 import os
-import fnmatch
 from .base import BaseAgent
 
 CODE_EXTENSIONS = {
@@ -16,6 +15,16 @@ CODE_EXTENSIONS = {
 }
 
 MAX_FILE_SIZE = 100_000  # 100KB limit for reading
+
+# Default to the project root (two levels above this file: agents/ → backend/ → project/)
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+
+
+def _resolve_dir(directory: str) -> str:
+    """Resolve directory, treating natural-language inputs as project root."""
+    if not directory or directory.lower() in (".", "current directory", "current dir", "here", "cwd"):
+        return PROJECT_ROOT
+    return os.path.expanduser(directory)
 
 
 class CodeAgent(BaseAgent):
@@ -85,6 +94,9 @@ class CodeAgent(BaseAgent):
         },
     ]
 
+    def action_status(self) -> dict:
+        return {"connected": True, "method": "local filesystem", "root": PROJECT_ROOT}
+
     def action_read_file(self, path: str) -> dict:
         path = os.path.expanduser(path)
         if not os.path.exists(path):
@@ -123,7 +135,7 @@ class CodeAgent(BaseAgent):
 
     def action_list_files(self, directory: str = ".", extension: str = "",
                           recursive: bool = False, limit: int = 50) -> list:
-        directory = os.path.expanduser(directory)
+        directory = _resolve_dir(directory)
         if not os.path.exists(directory):
             return [{"error": f"Directory not found: {directory}"}]
 
@@ -168,7 +180,7 @@ class CodeAgent(BaseAgent):
 
     def action_search_in_files(self, query: str, directory: str = ".",
                                extension: str = "", limit: int = 20) -> list:
-        directory = os.path.expanduser(directory)
+        directory = _resolve_dir(directory)
         if not os.path.exists(directory):
             return [{"error": f"Directory not found: {directory}"}]
 
