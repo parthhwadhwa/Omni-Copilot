@@ -21,16 +21,10 @@
 .chat-empty__icon {
   width: 56px;
   height: 56px;
-  border-radius: 16px;
-  background: var(--text-primary);
-  color: white;
-  font-size: 24px;
-  font-weight: 600;
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: 20px;
-  letter-spacing: -0.03em;
 }
 
 .chat-empty__title {
@@ -116,5 +110,28 @@
   30% {
     opacity: 1;
     transform: scale(1);
+  }
+}
+
+@media (max-width: 768px) {
+  .chat-area {
+    padding: 16px 12px;
+  }
+
+  .chat-empty {
+    padding: 24px 16px;
+  }
+
+  .chat-empty__title {
+    font-size: 22px;
+  }
+
+  .chat-empty__chip {
+    font-size: 12px;
+    padding: 6px 12px;
+  }
+
+  .chat-messages {
+    max-width: 100%;
   }
 }

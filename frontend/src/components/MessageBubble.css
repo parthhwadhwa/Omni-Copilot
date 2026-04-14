@@ -4,19 +4,32 @@
 }
 
 @keyframes bubbleIn {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-/* User */
+/* ── Timestamp ───────────────────────────────────────────────────────────── */
+.bubble__ts {
+  font-size: 10px;
+  color: var(--text-tertiary);
+  opacity: 0;
+  transition: opacity var(--transition);
+}
+
+.bubble:hover .bubble__ts {
+  opacity: 1;
+}
+
+/* ── User bubble ─────────────────────────────────────────────────────────── */
 .bubble--user {
   justify-content: flex-end;
+}
+
+.bubble__user-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
 }
 
 .bubble--user .bubble__text {
@@ -30,7 +43,7 @@
   word-break: break-word;
 }
 
-/* Assistant */
+/* ── Assistant bubble ────────────────────────────────────────────────────── */
 .bubble--assistant {
   justify-content: flex-start;
 }
@@ -38,24 +51,178 @@
 .bubble__results {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  max-width: 580px;
+  gap: 8px;
+  max-width: 600px;
   width: 100%;
 }
 
-/* AI reply — the main output */
+/* ── Markdown reply ──────────────────────────────────────────────────────── */
 .bubble__reply {
   font-size: 14px;
-  line-height: 1.7;
+  line-height: 1.75;
   color: var(--text-primary);
-  white-space: pre-wrap;
+  word-break: break-word;
 }
 
-/* Error display */
+.bubble__reply p {
+  margin: 0 0 6px;
+}
+
+.bubble__reply p:last-child {
+  margin-bottom: 0;
+}
+
+.bubble__reply ul,
+.bubble__reply ol {
+  padding-left: 20px;
+  margin: 4px 0 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.bubble__reply li {
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.bubble__reply strong {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.bubble__reply em {
+  font-style: italic;
+}
+
+.bubble__reply code {
+  font-family: "SF Mono", "Fira Code", monospace;
+  font-size: 12px;
+  background: var(--surface-secondary);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1px 5px;
+}
+
+.bubble__reply pre {
+  background: var(--surface-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  overflow-x: auto;
+  margin: 6px 0;
+}
+
+.bubble__reply pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 12px;
+}
+
+.bubble__reply a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.bubble__reply a:hover {
+  text-decoration: underline;
+}
+
+.bubble__reply h1,
+.bubble__reply h2,
+.bubble__reply h3 {
+  font-weight: 600;
+  margin: 4px 0 2px;
+  color: var(--text-primary);
+}
+
+.bubble__reply h1 { font-size: 16px; }
+.bubble__reply h2 { font-size: 15px; }
+.bubble__reply h3 { font-size: 14px; }
+
+.bubble__reply blockquote {
+  border-left: 3px solid var(--border-strong);
+  padding-left: 12px;
+  margin: 4px 0;
+  color: var(--text-secondary);
+}
+
+/* ── Result cards (list data from agents) ────────────────────────────────── */
+.result-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.result-card {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 12px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  transition: background var(--transition);
+}
+
+.result-card:last-child {
+  border-bottom: none;
+}
+
+.result-card:hover {
+  background: var(--surface-secondary);
+}
+
+.result-card--simple {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.result-card--more {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  justify-content: center;
+  background: var(--surface-secondary);
+}
+
+.result-card__label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.result-card__label a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.result-card__label a:hover {
+  text-decoration: underline;
+}
+
+.result-card__secondary {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  white-space: nowrap;
+  flex-shrink: 0;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Error display ───────────────────────────────────────────────────────── */
 .result-errors {
   background: rgba(255, 59, 48, 0.05);
   border: 1px solid rgba(255, 59, 48, 0.15);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm);
   padding: 10px 14px;
 }
 
@@ -65,9 +232,39 @@
   line-height: 1.4;
 }
 
-/* Collapsible details toggle */
-.detail-toggle {
+/* ── Actions row (copy + details) ────────────────────────────────────────── */
+.bubble__actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   margin-top: 2px;
+}
+
+.copy-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-tertiary);
+  padding: 3px 6px;
+  border-radius: 5px;
+  transition: all var(--transition);
+  font-family: inherit;
+}
+
+.copy-btn:hover {
+  color: var(--text-secondary);
+  background: var(--surface-secondary);
+}
+
+/* ── Collapsible details ─────────────────────────────────────────────────── */
+.detail-toggle {
+  display: flex;
+  flex-direction: column;
 }
 
 .detail-toggle__btn {
@@ -80,13 +277,15 @@
   font-size: 11px;
   font-weight: 500;
   color: var(--text-tertiary);
-  padding: 4px 2px;
-  transition: color var(--transition);
+  padding: 3px 6px;
+  border-radius: 5px;
+  transition: all var(--transition);
   font-family: inherit;
 }
 
 .detail-toggle__btn:hover {
   color: var(--text-secondary);
+  background: var(--surface-secondary);
 }
 
 .detail-toggle__body {
@@ -101,7 +300,7 @@
   animation: bubbleIn 0.2s ease;
 }
 
-/* Detail sections (steps, log) */
+/* ── Plan steps & log ────────────────────────────────────────────────────── */
 .detail-section {
   display: flex;
   flex-direction: column;

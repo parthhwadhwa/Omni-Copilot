@@ -226,6 +226,68 @@
   color: var(--text-tertiary);
 }
 
+/* Status panel */
+.sidebar__status-toggle {
+  cursor: pointer;
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: inherit;
+  margin-top: 4px;
+}
+
+.sidebar__status-toggle:hover {
+  color: var(--text-secondary);
+}
+
+.sidebar__status-arrow {
+  font-size: 12px;
+  transition: transform var(--transition);
+  display: inline-block;
+}
+
+.sidebar__status-arrow--open {
+  transform: rotate(180deg);
+}
+
+.sidebar__status-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px 8px;
+  padding: 6px 8px 10px;
+}
+
+.sidebar__status-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sidebar__status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.sidebar__status-dot--on {
+  background: #34c759;
+}
+
+.sidebar__status-dot--off {
+  background: var(--text-tertiary);
+}
+
+.sidebar__status-name {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  text-transform: capitalize;
+}
+
 /* Toggle button */
 .sidebar-toggle {
   position: fixed;
@@ -253,4 +315,15 @@
 
 .sidebar-toggle--closed {
   left: 16px;
+}
+
+@media (max-width: 768px) {
+  .sidebar-toggle {
+    left: 12px;
+    top: 12px;
+  }
+
+  .sidebar-toggle:not(.sidebar-toggle--closed) {
+    left: 272px;
+  }
 }

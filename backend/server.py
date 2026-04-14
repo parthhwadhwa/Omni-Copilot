@@ -37,3 +37,16 @@ def memory(query: str = "", limit: int = 10):
 def toggle_auto_mode(enabled: bool = True):
     orch.set_auto_mode(enabled)
     return {"auto_mode": orch.auto_mode}
+
+
+@app.get("/status")
+def agent_status():
+    from agents import ALL_AGENTS
+    statuses = {}
+    for name, cls in ALL_AGENTS.items():
+        try:
+            result = cls().handle("status", {})
+            statuses[name] = result.get("ok", False)
+        except Exception:
+            statuses[name] = False
+    return {"agents": statuses}

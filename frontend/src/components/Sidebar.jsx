@@ -1,4 +1,7 @@
+import { useState, useEffect } from "react";
 import "./Sidebar.css";
+
+const API = "http://localhost:8000";
 
 const AGENTS = [
   { key: "mail", label: "Gmail", icon: "gmail", query: "Show my inbox" },
@@ -141,7 +144,29 @@ const OmniLogo = () => (
   </svg>
 );
 
+const STATUS_AGENTS = [
+  "mail", "calendar", "drive", "forms", "meeting", "docs",
+  "slack", "discord", "notion", "github", "code", "file",
+];
+
+function useAgentStatus() {
+  const [status, setStatus] = useState({});
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+    fetch(`${API}/status`)
+      .then((r) => r.json())
+      .then((d) => setStatus(d.agents || {}))
+      .catch(() => setStatus({}));
+  }, [open]);
+
+  return { status, open, setOpen };
+}
+
 export default function Sidebar({ open, onToggle, onClear, autoMode, onAutoModeToggle, onSend, theme, onThemeToggle }) {
+  const agentStatus = useAgentStatus();
+
   return (
     <>
       <aside className={`sidebar ${open ? "sidebar--open" : ""}`}>
@@ -188,6 +213,27 @@ export default function Sidebar({ open, onToggle, onClear, autoMode, onAutoModeT
             </button>
           ))}
         </nav>
+
+        <button
+          className="sidebar__section-label sidebar__status-toggle"
+          onClick={() => agentStatus.setOpen(!agentStatus.open)}
+        >
+          Agent Status
+          <span className={`sidebar__status-arrow ${agentStatus.open ? "sidebar__status-arrow--open" : ""}`}>▾</span>
+        </button>
+        {agentStatus.open && (
+          <div className="sidebar__status-grid">
+            {STATUS_AGENTS.map((key) => {
+              const connected = agentStatus.status[key];
+              return (
+                <div key={key} className="sidebar__status-item">
+                  <span className={`sidebar__status-dot ${connected ? "sidebar__status-dot--on" : "sidebar__status-dot--off"}`} />
+                  <span className="sidebar__status-name">{key}</span>
+                </div>
+              );
+            })}
+          </div>
+        )}
 
         <div className="sidebar__footer">
           <button

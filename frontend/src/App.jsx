@@ -7,9 +7,16 @@ import "./App.css";
 const API = "http://localhost:8000";
 
 export default function App() {
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState(() => {
+    try {
+      const saved = localStorage.getItem("chat_history");
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
   const [loading, setLoading] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth > 768);
   const [autoMode, setAutoMode] = useState(false);
   const [theme, setTheme] = useState(() => localStorage.getItem("theme") || "light");
   const scrollRef = useRef(null);
@@ -20,11 +27,21 @@ export default function App() {
   }, [theme]);
 
   useEffect(() => {
+    try {
+      const trimmed = messages.slice(-50);
+      localStorage.setItem("chat_history", JSON.stringify(trimmed));
+    } catch {
+      // storage full or unavailable
+    }
+  }, [messages]);
+
+  useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages]);
 
   const send = async (text) => {
     if (!text.trim() || loading) return;
+    if (window.innerWidth <= 768) setSidebarOpen(false);
 
     const userMsg = { role: "user", content: text, ts: Date.now() };
     setMessages((prev) => [...prev, userMsg]);
@@ -62,7 +79,10 @@ export default function App() {
     }
   };
 
-  const clearChat = () => setMessages([]);
+  const clearChat = () => {
+    setMessages([]);
+    localStorage.removeItem("chat_history");
+  };
 
   return (
     <div className="app">
@@ -76,6 +96,9 @@ export default function App() {
         theme={theme}
         onThemeToggle={() => setTheme(theme === "light" ? "dark" : "light")}
       />
+      {sidebarOpen && (
+        <div className="sidebar-backdrop" onClick={() => setSidebarOpen(false)} />
+      )}
       <main className={`main ${sidebarOpen ? "" : "main--expanded"}`}>
         <ChatArea messages={messages} loading={loading} scrollRef={scrollRef} onChipClick={send} />
         <InputBar onSend={send} loading={loading} />
