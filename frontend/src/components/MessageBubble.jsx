@@ -56,8 +56,8 @@ function formatVal(key, val) {
   if (!val) return "";
   const s = String(val);
 
-  // ISO datetime: 2026-04-15T10:00:00
-  if ((key === "start" || key === "date") && s.includes("T")) {
+  // ISO datetime: 2026-04-15T10:00:00 — must match YYYY-MM-DDTHH exactly
+  if ((key === "start" || key === "date") && /^\d{4}-\d{2}-\d{2}T/.test(s)) {
     const [d, t] = s.split("T");
     try {
       const time = new Date(`1970-01-01T${t}`).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
@@ -66,13 +66,17 @@ function formatVal(key, val) {
   }
 
   // RFC 2822 / email date: "Tue, 14 Apr 2026 08:54:46 -0700 (PDT)"
-  if (key === "date" || key === "snippet") {
-    // Strip trailing timezone name "(PDT)" before parsing
+  if (key === "date") {
     const cleaned = s.replace(/\s*\([^)]*\)\s*$/, "").trim();
     const d = new Date(cleaned);
     if (!isNaN(d.getTime())) {
       return d.toLocaleDateString([], { month: "short", day: "numeric" }) +
         " · " + d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    }
+    // Try extracting date parts manually: "Thu, 16 Apr 2026 02:32:12 -0700"
+    const m = cleaned.match(/(\d{1,2})\s+(\w{3})\s+(\d{4})\s+(\d{2}):(\d{2})/);
+    if (m) {
+      return `${m[2]} ${m[1]} · ${m[4]}:${m[5]}`;
     }
   }
 
@@ -81,6 +85,8 @@ function formatVal(key, val) {
 }
 
 function ResultCards({ results }) {
+  const [expanded, setExpanded] = useState({});
+
   const lists = results
     .filter((r) => r.ok && Array.isArray(r.result) && r.result.length > 0)
     .map((r) => r.result);
@@ -92,17 +98,21 @@ function ResultCards({ results }) {
       {lists.map((list, li) => {
         const first = typeof list[0] === "object" ? list[0] : {};
         const labelKey = LABEL_KEYS.find((k) => first[k]);
-        // Only pick a secondary key that has a parseable/useful value
-        const secondKey = SECONDARY_KEYS.find((k) => {
+        const isEmail = !!(first.from && first.subject);
+        const secondKey = isEmail ? "date" : SECONDARY_KEYS.find((k) => {
           if (!first[k] || k === labelKey) return false;
           const formatted = formatVal(k, first[k]);
           return formatted && !formatted.startsWith("Invalid");
         });
 
+        const showAll = expanded[li];
+        const visible = showAll ? list : list.slice(0, 8);
+        const extra = list.length - 8;
+
         return (
           <div key={li} className="result-cards">
             <div className="result-cards__header">{list.length} result{list.length !== 1 ? "s" : ""}</div>
-            {list.slice(0, 8).map((item, i) => {
+            {visible.map((item, i) => {
               if (typeof item !== "object") {
                 return <div key={i} className="result-card result-card--simple">{String(item)}</div>;
               }
@@ -110,21 +120,29 @@ function ResultCards({ results }) {
               const secondary = secondKey ? item[secondKey] : null;
               const secondaryFormatted = secondary ? formatVal(secondKey, secondary) : null;
               const link = item.url || item.link || item.html_url;
+              // For emails, show sender below subject
+              const sender = isEmail ? (item.from || "").replace(/<[^>]+>/, "").trim() : null;
               return (
                 <div key={i} className="result-card">
-                  <span className="result-card__label">
-                    {link ? (
-                      <a href={link} target="_blank" rel="noreferrer">{label}</a>
-                    ) : label}
-                  </span>
+                  <div className="result-card__main">
+                    <span className="result-card__label">
+                      {link ? <a href={link} target="_blank" rel="noreferrer">{label}</a> : label}
+                    </span>
+                    {sender && <span className="result-card__sender">{sender}</span>}
+                  </div>
                   {secondaryFormatted && !secondaryFormatted.startsWith("Invalid") && (
                     <span className="result-card__secondary">{secondaryFormatted}</span>
                   )}
                 </div>
               );
             })}
-            {list.length > 8 && (
-              <div className="result-card result-card--more">+{list.length - 8} more</div>
+            {extra > 0 && (
+              <button
+                className="result-card result-card--more"
+                onClick={() => setExpanded((p) => ({ ...p, [li]: !p[li] }))}
+              >
+                {showAll ? "Show less" : `+${extra} more`}
+              </button>
             )}
           </div>
         );

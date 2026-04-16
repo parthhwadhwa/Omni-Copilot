@@ -142,6 +142,11 @@ class ConversationState:
             return False
         lower = text.lower().strip()
 
+        # Slash commands are always new requests, never follow-ups
+        if lower.startswith("/"):
+            self.clear()
+            return False
+
         # Explicit greetings / resets
         if lower in {"hi", "hello", "hey", "thanks", "thank you", "bye", "help", "quit"}:
             self.clear()
@@ -294,11 +299,21 @@ def _validate_and_fill(params: dict, agent_name: str, action: str,
     if "start" in keys and not params.get("start"):
         params["start"] = f"{datetime.now().date().isoformat()}T{DEFAULTS['time']}"
 
-    # Default "to" for mail/send to the user's own email when not specified
+    # Fill "to" for mail steps: prefer meeting attendee over sender's own email
     if "to" in keys and not params.get("to"):
-        from config import EMAIL_USER
-        if EMAIL_USER:
-            params["to"] = EMAIL_USER
+        # Try attendees from context chain or last meeting (pronoun refs like "him/her/them")
+        attendees = (
+            context.get("attendees")
+            or (last_meeting or {}).get("attendees")
+        )
+        if attendees and isinstance(attendees, list) and attendees[0]:
+            params["to"] = attendees[0]
+        elif attendees and isinstance(attendees, str) and attendees:
+            params["to"] = attendees
+        else:
+            from config import EMAIL_USER
+            if EMAIL_USER:
+                params["to"] = EMAIL_USER
 
     return [k for k in required if not params.get(k)]
 
@@ -310,7 +325,9 @@ def _validate_and_fill(params: dict, agent_name: str, action: str,
 # Fields to hide from the reply (internal / redundant)
 _REPLY_SKIP = frozenset({"ok", "status", "retries", "webhook_sent", "webhook_error",
                           "smtp_sent", "smtp_error", "setup", "note", "folder",
-                          "read", "last_edited", "created_at"})
+                          "read", "last_edited", "created_at",
+                          "gcal_error", "zoom_error", "storage", "calendar_link",
+                          "meeting_id", "duration_minutes"})
 
 # Human-friendly field labels
 _FIELD_LABELS = {
@@ -560,11 +577,10 @@ class Orchestrator:
             missing = _validate_and_fill(params, agent_name, action, context, last_meeting)
             if missing:
                 log.add("skip", f"{label} missing: {missing}")
-                # Skip email steps if no recipient — don't fail the whole plan
-                if "to" in missing:
-                    results.append({"ok": False, "error": f"Skipped: no recipient for {label}",
-                                     "status": "skipped", "retries": 0})
-                    continue
+                results.append({"ok": False,
+                                 "error": f"Please provide: {', '.join(missing)}",
+                                 "status": "skipped", "retries": 0})
+                continue
 
             try:
                 result = agent.handle(action, params)

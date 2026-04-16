@@ -20,12 +20,12 @@ const AGENTS = [
 ];
 
 const COMMANDS = [
-  { cmd: "/schedule", desc: "Schedule meeting" },
-  { cmd: "/email", desc: "Send email" },
-  { cmd: "/summarize", desc: "Search & summarize" },
-  { cmd: "/inbox", desc: "Check inbox" },
-  { cmd: "/calendar", desc: "List events" },
-  { cmd: "/meet", desc: "Meet + invite" },
+  { cmd: "/schedule", desc: "Schedule meeting", message: "Schedule a meeting" },
+  { cmd: "/email", desc: "Send email", message: "Send an email" },
+  { cmd: "/summarize", desc: "Search & summarize", message: "Read my recent emails" },
+  { cmd: "/inbox", desc: "Check inbox", message: "Read my inbox" },
+  { cmd: "/calendar", desc: "List events", message: "List upcoming calendar events" },
+  { cmd: "/meet", desc: "Meet + invite", message: "Schedule a Google Meet and invite attendees" },
 ];
 
 const ICONS = {
@@ -253,7 +253,7 @@ export default function Sidebar({ open, onToggle, onNewChat, sessions = [], acti
               <button
                 key={c.cmd}
                 className="sidebar__command"
-                onClick={() => onSend?.(c.cmd)}
+                onClick={() => onSend?.(c.message || c.cmd)}
               >
                 <span className="sidebar__command-key">{c.cmd}</span>
                 <span className="sidebar__command-desc">{c.desc}</span>
