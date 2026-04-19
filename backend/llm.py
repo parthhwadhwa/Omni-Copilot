@@ -98,9 +98,17 @@ def _system_prompt(tool_text: str) -> str:
         "4. Extract param values only from user input or provided context. Never invent values.\n"
         "5. Dates/times → ISO 8601 string (e.g. 2026-04-12T14:00:00).\n"
         "6. Leave body/text/content empty — the execution layer fills from context.\n"
-        "7. Multiple platforms in one request → one step per platform.\n"
-        "8. params must be a JSON object. Never null, never a string.\n"
-        "9. Output ONLY the JSON object. Nothing before or after it."
+        "7. MULTI-STEP: if the user asks for two or more actions in one sentence (e.g. \"schedule X and email them\", "
+        "\"create a doc and share on slack\", \"schedule meeting and send invite\"), output ONE STEP PER ACTION in order. "
+        "The execution layer chains context (e.g. meeting link → email body) automatically.\n"
+        "8. Multiple platforms in one request → one step per platform.\n"
+        "9. params must be a JSON object. Never null, never a string.\n"
+        "10. Output ONLY the JSON object. Nothing before or after it.\n\n"
+        "Examples of multi-step plans:\n"
+        "- \"schedule meeting tomorrow 3pm with a@b.com and email the invite\" → "
+        "[{agent:meeting,action:schedule,...},{agent:mail,action:send,params:{to:\"a@b.com\",subject:\"\",body:\"\"}}]\n"
+        "- \"create a doc called notes and share on slack #general\" → "
+        "[{agent:docs,action:write_doc,...},{agent:slack,action:send_message,params:{channel:\"#general\",text:\"\"}}]"
     )
 
 

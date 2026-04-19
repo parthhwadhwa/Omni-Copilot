@@ -12,8 +12,12 @@ def load_data(filename: str) -> list[dict]:
     path = os.path.join(DATA_DIR, filename)
     if not os.path.exists(path):
         return []
-    with open(path) as f:
-        return json.load(f)
+    try:
+        with open(path) as f:
+            data = json.load(f)
+        return data if isinstance(data, list) else []
+    except (json.JSONDecodeError, OSError):
+        return []
 
 
 def save_data(filename: str, data: list[dict]):

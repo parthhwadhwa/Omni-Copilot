@@ -131,11 +131,15 @@ def _extract_structured(text: str) -> dict:
 # Conversation state — follow-up merging without LLM
 # ---------------------------------------------------------------------------
 
+_PRONOUNS = {"her", "him", "them", "she", "he", "they", "this person", "the person"}
+
+
 class ConversationState:
     def __init__(self):
         self.intent: str | None = None
         self.steps: list[dict] = []
         self.context: dict = {}  # accumulated structured data
+        self.memory: dict = {}   # persists across ALL turns (emails, names, etc.)
 
     def is_followup(self, text: str) -> bool:
         if not self.intent:
@@ -155,7 +159,10 @@ class ConversationState:
         # Short message with no action-starting verb = follow-up
         words = lower.split()
         starters = {"send", "schedule", "create", "show", "list", "read",
-                    "write", "check", "search", "find", "book", "open", "get"}
+                    "write", "check", "search", "find", "book", "open", "get",
+                    "email", "mail", "share", "post", "message", "reply",
+                    "invite", "forward", "remind", "add", "delete", "update",
+                    "replace", "change", "rename", "move", "copy"}
         if len(words) <= 6 and not any(w in starters for w in words):
             return True
         return False
@@ -227,12 +234,97 @@ class ConversationState:
         # Reset context for fresh request — only keep structured data from this plan's params
         self.context = {}
         for step in self.steps:
-            self.context.update({k: v for k, v in step.get("params", {}).items() if v})
+            params = step.get("params", {})
+            self.context.update({k: v for k, v in params.items() if v})
+            # Persist emails into cross-turn memory
+            for key in ("to", "email"):
+                val = params.get(key, "")
+                if val and "@" in str(val):
+                    self.memory["last_email"] = str(val)
+            attendees = params.get("attendees", [])
+            if isinstance(attendees, list):
+                emails = [a for a in attendees if "@" in str(a)]
+                if emails:
+                    self.memory["last_email"] = emails[0]
 
     def clear(self):
         self.intent = None
         self.steps = []
         self.context = {}
+
+
+# ---------------------------------------------------------------------------
+# Meeting invite body builder — produces plain + HTML version
+# ---------------------------------------------------------------------------
+
+def _build_meeting_invite(src: dict) -> tuple[str, str]:
+    """Return (plain_text, html) body for a meeting invite email."""
+    from config import EMAIL_USER
+    title = src.get("title", "Meeting")
+    link = src.get("link", "")
+    start_raw = src.get("start", "")
+    platform = src.get("platform", "").replace("_", " ").title() or "Google Meet"
+    duration = src.get("duration_minutes", 30)
+
+    date_str, time_str = "", ""
+    if start_raw and "T" in start_raw:
+        d, t = start_raw.split("T", 1)
+        date_str = d
+        try:
+            time_str = datetime.strptime(t.split("+")[0].split("Z")[0][:8],
+                                          "%H:%M:%S").strftime("%I:%M %p").lstrip("0")
+        except ValueError:
+            time_str = t
+    elif start_raw:
+        date_str = start_raw
+
+    from config import SENDER_NAME
+    sender = SENDER_NAME or ((EMAIL_USER or "").split("@")[0].title() if EMAIL_USER else "")
+
+    plain_lines = [
+        "Hi,",
+        "",
+        f"You're invited to a meeting: {title}.",
+        "",
+    ]
+    if date_str:
+        plain_lines.append(f"📅 Date: {date_str}")
+    if time_str:
+        plain_lines.append(f"⏰ Time: {time_str} (IST)")
+    plain_lines.append(f"⏱  Duration: {duration} minutes")
+    plain_lines.append(f"📍 Platform: {platform}")
+    if link:
+        plain_lines.append(f"🔗 Join: {link}")
+    plain_lines.extend(["", "See you there!", "", f"Regards,", sender or "—"])
+    plain = "\n".join(plain_lines)
+
+    link_block = (
+        f'<a href="{link}" style="display:inline-block;background:#1a73e8;color:#fff;text-decoration:none;padding:12px 24px;border-radius:8px;font-weight:600;font-size:14px;">Join meeting</a>'
+        f'<p style="margin:20px 0 0;font-size:13px;color:#5f6368;word-break:break-all;">Or paste this link: <a href="{link}" style="color:#1a73e8;">{link}</a></p>'
+    ) if link else (
+        '<p style="margin:20px 0 0;font-size:13px;color:#5f6368;">The meeting link will be shared separately.</p>'
+    )
+
+    html = f"""<!DOCTYPE html><html><body style="font-family:-apple-system,Segoe UI,Arial,sans-serif;color:#202124;margin:0;padding:24px;background:#f6f8fa;">
+<div style="max-width:560px;margin:0 auto;background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;">
+<div style="background:#1a73e8;color:#fff;padding:20px 24px;">
+<div style="font-size:12px;letter-spacing:.08em;text-transform:uppercase;opacity:.85;">Meeting Invitation</div>
+<div style="font-size:22px;font-weight:600;margin-top:4px;">{title}</div>
+</div>
+<div style="padding:24px;">
+<p style="margin:0 0 16px;font-size:15px;">Hi,</p>
+<p style="margin:0 0 20px;font-size:15px;line-height:1.5;">You're invited to join a meeting. Details below:</p>
+<table style="border-collapse:collapse;width:100%;margin-bottom:20px;font-size:14px;">
+<tr><td style="padding:8px 0;color:#5f6368;width:110px;">📅 Date</td><td style="padding:8px 0;font-weight:500;">{date_str or '—'}</td></tr>
+<tr><td style="padding:8px 0;color:#5f6368;">⏰ Time</td><td style="padding:8px 0;font-weight:500;">{time_str or '—'} (IST)</td></tr>
+<tr><td style="padding:8px 0;color:#5f6368;">⏱ Duration</td><td style="padding:8px 0;font-weight:500;">{duration} minutes</td></tr>
+<tr><td style="padding:8px 0;color:#5f6368;">📍 Platform</td><td style="padding:8px 0;font-weight:500;">{platform}</td></tr>
+</table>
+{link_block}
+<hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0;">
+<p style="margin:0;font-size:14px;color:#5f6368;">Regards,<br><strong style="color:#202124;">{sender or 'OmniCopilot'}</strong></p>
+</div></div></body></html>"""
+    return plain, html
 
 
 # ---------------------------------------------------------------------------
@@ -260,30 +352,51 @@ def _validate_and_fill(params: dict, agent_name: str, action: str,
         if not params.get(key) and key in context:
             params[key] = context[key]
 
-    # Fill text/body/content from context (step chain first, then last meeting fallback)
+    # Fill text/body from context — ONLY for mail.send, not docs/drive/etc.
+    is_mail_send = (agent_name == "mail" and action == "send")
     text_keys = [k for k in ("body", "text", "content") if k in keys and not params.get(k)]
-    if text_keys:
-        src = context if (context.get("link") or context.get("title")) else (last_meeting or {})
-        if src.get("link") or src.get("title"):
-            lines = []
-            if src.get("title"):
-                lines.append(f"Meeting: {src['title']}")
-            start = src.get("start", "")
-            if start and "T" in start:
-                d, t = start.split("T", 1)
-                try:
-                    t = datetime.strptime(t, "%H:%M:%S").strftime("%I:%M %p").lstrip("0")
-                except ValueError:
-                    pass
-                lines.append(f"When: {d} at {t}")
-            if src.get("platform"):
-                lines.append(f"Platform: {src['platform'].replace('_', ' ').title()}")
-            if src.get("link"):
-                lines.append(f"Link: {src['link']}")
-            params[text_keys[0]] = "\n".join(lines)
 
-    if "subject" in keys and not params.get("subject") and context.get("title"):
-        params["subject"] = f"Meeting: {context['title']}"
+    # Only use meeting context from the CURRENT step's chain (context), never from
+    # last_meeting alone — that would bleed into unrelated standalone email sends.
+    chain_src = context if (context.get("title") and context.get("start")) else {}
+    is_meeting_invite = is_mail_send and bool(chain_src.get("title") and chain_src.get("start"))
+
+    if text_keys and is_mail_send:
+        if is_meeting_invite:
+            plain, html = _build_meeting_invite(chain_src)
+            params[text_keys[0]] = plain
+            if "html" in keys and not params.get("html"):
+                params["html"] = html
+        else:
+            # Simple email: body was already in params (from LLM), or use a plain fallback
+            fallback = params.get("subject") or "Hello"
+            params[text_keys[0]] = fallback
+
+    if is_mail_send and "subject" in keys and not params.get("subject"):
+        if chain_src.get("title"):
+            params["subject"] = f"Meeting invite: {chain_src['title']}"
+
+    # Slack / Discord chat — auto-build a share message from upstream context
+    is_chat_send = (
+        (agent_name == "slack" and action == "send_message") or
+        (agent_name == "discord" and action in ("send_message", "send"))
+    )
+    if is_chat_send and text_keys:
+        ctx_title = context.get("title") or context.get("subject") or ""
+        ctx_link = context.get("link") or context.get("html_url") or context.get("url") or ""
+        ctx_path = context.get("file_path") or context.get("filename") or ""
+        if ctx_title and ctx_link:
+            params[text_keys[0]] = f"{ctx_title} — {ctx_link}"
+        elif ctx_title and ctx_path:
+            params[text_keys[0]] = f"{ctx_title} (saved at {ctx_path})"
+        elif ctx_title:
+            params[text_keys[0]] = ctx_title
+        else:
+            params[text_keys[0]] = "Shared from OmniCopilot"
+
+    # Default empty content for docs/notes agents so they never block on missing content
+    if agent_name in ("docs", "drive", "notion") and "content" in keys and not params.get("content"):
+        params["content"] = ""
 
     # Apply defaults: schema-declared defaults first, then DEFAULTS dict
     schema_props = _get_param_schema(agent_name, action).get("properties", {})
@@ -299,21 +412,28 @@ def _validate_and_fill(params: dict, agent_name: str, action: str,
     if "start" in keys and not params.get("start"):
         params["start"] = f"{datetime.now().date().isoformat()}T{DEFAULTS['time']}"
 
+    # Resolve pronouns in "to" — replace "her"/"him"/"them" with last known email
+    if "to" in keys and str(params.get("to", "")).lower().strip() in _PRONOUNS:
+        params["to"] = context.get("last_email", "")
+
     # Fill "to" for mail steps: prefer meeting attendee over sender's own email
     if "to" in keys and not params.get("to"):
-        # Try attendees from context chain or last meeting (pronoun refs like "him/her/them")
-        attendees = (
-            context.get("attendees")
-            or (last_meeting or {}).get("attendees")
-        )
-        if attendees and isinstance(attendees, list) and attendees[0]:
-            params["to"] = attendees[0]
-        elif attendees and isinstance(attendees, str) and attendees:
-            params["to"] = attendees
+        # Try last known email from cross-turn memory
+        if context.get("last_email"):
+            params["to"] = context["last_email"]
         else:
-            from config import EMAIL_USER
-            if EMAIL_USER:
-                params["to"] = EMAIL_USER
+            attendees = (
+                context.get("attendees")
+                or (last_meeting or {}).get("attendees")
+            )
+            if attendees and isinstance(attendees, list) and attendees[0]:
+                params["to"] = attendees[0]
+            elif attendees and isinstance(attendees, str) and attendees:
+                params["to"] = attendees
+            else:
+                from config import EMAIL_USER
+                if EMAIL_USER:
+                    params["to"] = EMAIL_USER
 
     return [k for k in required if not params.get(k)]
 
@@ -327,7 +447,12 @@ _REPLY_SKIP = frozenset({"ok", "status", "retries", "webhook_sent", "webhook_err
                           "smtp_sent", "smtp_error", "setup", "note", "folder",
                           "read", "last_edited", "created_at",
                           "gcal_error", "zoom_error", "storage", "calendar_link",
-                          "meeting_id", "duration_minutes"})
+                          "meeting_id", "duration_minutes", "ics", "html",
+                          "file_id", "doc_id", "page_id", "form_id", "event_id",
+                          "message_id", "message_ts", "channel", "name",
+                          "timestamp", "to", "subject", "url", "attendees",
+                          "webhook_error", "setup",
+                          "conflict", "existing", "proposed", "message"})
 
 # Human-friendly field labels
 _FIELD_LABELS = {
@@ -352,20 +477,25 @@ def _format_value(key: str, val) -> str:
         return f"{d} at {t}"
     if key == "platform" and isinstance(val, str):
         return val.replace("_", " ").title()
+    # Render URLs as clickable markdown links
+    if isinstance(val, str) and val.startswith(("http://", "https://")):
+        return f"[Open ↗]({val})"
     return str(val)
 
 
 def _success_header(res: dict) -> str:
     """Return a one-line success headline based on what keys are in the result."""
-    if res.get("smtp_sent"):
-        return "Email sent successfully."
-    if res.get("status") == "sent":
+    if res.get("channel") and res.get("message_ts"):
+        return f"Posted to #{res['channel']}."
+    if res.get("smtp_sent") or res.get("message_id"):
         return "Email sent."
     if res.get("link") and res.get("platform"):
         platform = str(res["platform"]).replace("_", " ").title()
         return f"{platform} meeting scheduled."
     if res.get("link") and "calendar" in str(res.get("storage", "")):
         return "Meeting scheduled."
+    if res.get("file_id") or (res.get("name") and res.get("link")):
+        return f"Created **{res.get('name') or res.get('title') or 'document'}**."
     if res.get("status") in ("created", "written"):
         return f"{str(res.get('status', '')).capitalize()}."
     if res.get("status") == "scheduled":
@@ -388,6 +518,16 @@ def _build_reply(results: list[dict]) -> str:
 
         if isinstance(res, dict):
             if not res:
+                continue
+            # Meeting conflict — render as a gentle notice, let frontend handle UI
+            if res.get("conflict"):
+                existing = res.get("existing", {}) or {}
+                when = _format_value("start", existing.get("start", ""))
+                title = existing.get("title", "a meeting")
+                parts.append(
+                    f"You already have **{title}** scheduled on {when}. "
+                    f"Would you like to replace it with the new meeting?"
+                )
                 continue
             # Connection status response
             if "connected" in res:
@@ -418,7 +558,7 @@ def _build_reply(results: list[dict]) -> str:
                 continue
             first = res[0] if isinstance(res[0], dict) else {}
             label_key = next(
-                (k for k in ("title", "name", "subject", "from", "path") if first.get(k)),
+                (k for k in ("title", "name", "repo", "full_name", "subject", "from", "path") if first.get(k)),
                 None,
             )
             bullets = []
@@ -426,11 +566,15 @@ def _build_reply(results: list[dict]) -> str:
                 if isinstance(item, dict):
                     primary = item.get(label_key, "") if label_key else ""
                     secondary = ""
-                    for sk in ("start", "date", "snippet", "url", "link"):
+                    for sk in ("start", "date", "snippet", "url", "link", "html_url"):
                         if item.get(sk):
                             secondary = f" — {_format_value(sk, item[sk])}"
                             break
-                    bullets.append(f"- {primary or str(item)}{secondary}")
+                    # Fallback: join first two string values if no label found
+                    if not primary:
+                        vals = [str(v) for v in item.values() if v and isinstance(v, str)]
+                        primary = vals[0] if vals else "—"
+                    bullets.append(f"- {primary}{secondary}")
                 else:
                     bullets.append(f"- {item}")
             parts.append(f"**{len(res)} result(s)**\n\n" + "\n".join(bullets))
@@ -456,23 +600,168 @@ class Orchestrator:
         log = ExecutionLog()
         log.add("input", user_input)
 
-        # --- Follow-up: merge into pending task, no LLM ---
+        replace_plan = self._maybe_replace_plan(user_input)
+        if replace_plan is not None:
+            self._patch_dates(replace_plan, user_input)
+            self.state.save(replace_plan)
+            return self._execute(replace_plan, user_input, log)
+
         if self.state.is_followup(user_input):
             log.add("followup", "merging")
             plan = self.state.merge(user_input)
             return self._execute(plan, user_input, log)
 
-        # --- LLM planning (single call) ---
         if GROQ_API_KEY:
             plan = self._plan(user_input, log)
         else:
             plan = {"intent": "unknown", "steps": []}
 
-        # --- Patch dates with rule-based parser (overrides LLM) ---
         self._patch_dates(plan, user_input)
-
         self.state.save(plan)
         return self._execute(plan, user_input, log)
+
+    def process_stream(self, user_input: str):
+        """Generator: yields SSE events as each agent step executes in real time."""
+        import json
+
+        def evt(obj: dict) -> str:
+            return f"data: {json.dumps(obj)}\n\n"
+
+        AGENT_ICONS = {
+            "mail": "📧", "calendar": "📅", "meeting": "📹",
+            "drive": "📁", "docs": "📄", "forms": "📋",
+            "slack": "💬", "discord": "🎮", "notion": "📓",
+            "github": "🐙", "code": "💻", "file": "📂", "search": "🔍",
+        }
+        ACTION_LABELS = {
+            "send": "Sending email", "read": "Reading inbox",
+            "schedule": "Scheduling meeting", "list": "Fetching list",
+            "write_doc": "Creating document", "search": "Searching",
+            "send_message": "Posting to Slack", "create": "Creating",
+            "read_messages": "Reading messages", "list_files": "Listing files",
+        }
+
+        log = ExecutionLog()
+        log.add("input", user_input)
+        yield evt({"type": "planning"})
+
+        try:
+            replace_plan = self._maybe_replace_plan(user_input)
+            if replace_plan is not None:
+                plan = replace_plan
+            elif self.state.is_followup(user_input):
+                plan = self.state.merge(user_input)
+            elif GROQ_API_KEY:
+                plan = self._plan(user_input, log)
+            else:
+                plan = {"intent": "unknown", "steps": []}
+
+            self._patch_dates(plan, user_input)
+            self.state.save(plan)
+
+            steps = plan.get("steps", [])
+            intent = plan.get("intent", "unknown")
+            total = len(steps)
+
+            if not steps:
+                reply = self._capability_list() if intent == "unknown" else "How can I help you?"
+                yield evt({"type": "done", "plan": [], "results": [], "log": log.entries, "reply": reply})
+                return
+
+            display_plan = [
+                {"step": i + 1, "agent": s.get("agent", "?"), "action": s.get("action", "?"),
+                 "label": f"{s.get('agent','?')}.{s.get('action','?')}"}
+                for i, s in enumerate(steps)
+            ]
+
+            context = {**self.state.memory, **self.state.context}
+            last_meeting = self._last_stored("meetings.json")
+            results = []
+
+            for i, step in enumerate(steps):
+                try:
+                    agent_name, action, params = self._normalise_step(step)
+                except Exception as e:
+                    results.append({"ok": False, "error": f"Invalid step: {e}", "status": "failed", "retries": 0})
+                    continue
+
+                action_label = ACTION_LABELS.get(action, action.replace("_", " ").title())
+                icon = AGENT_ICONS.get(agent_name, "⚙️")
+
+                yield evt({
+                    "type": "step",
+                    "index": i,
+                    "total": total,
+                    "agent": agent_name,
+                    "label": f"{action_label}…",
+                    "icon": icon,
+                })
+
+                label = f"{agent_name}.{action}"
+                log.add("step", label)
+
+                if agent_name == "search":
+                    try:
+                        res = search_all_sources(params.get("query", user_input))
+                        results.append({"ok": True, "result": res, "status": "success", "retries": 0})
+                        if isinstance(res, dict):
+                            context.update(res)
+                    except Exception as e:
+                        results.append({"ok": False, "error": f"Search failed: {e}", "status": "failed", "retries": 0})
+                    continue
+
+                agent = self.agents.get(agent_name)
+                if not agent:
+                    results.append({"ok": False, "error": f"Unknown agent: {agent_name}", "status": "failed", "retries": 0})
+                    if not self.auto_mode:
+                        break
+                    continue
+
+                try:
+                    missing = _validate_and_fill(params, agent_name, action, context, last_meeting)
+                except Exception as e:
+                    results.append({"ok": False, "error": f"Validation failed: {e}", "status": "failed", "retries": 0})
+                    continue
+
+                if missing:
+                    results.append({"ok": False, "error": f"Please provide: {', '.join(missing)}", "status": "skipped", "retries": 0})
+                    continue
+
+                try:
+                    result = agent.handle(action, params)
+                except Exception as e:
+                    result = {"ok": False, "error": str(e)}
+
+                results.append({**result, "status": "success" if result.get("ok") else "failed", "retries": 0})
+
+                if result.get("ok"):
+                    res = result.get("result", {})
+                    if isinstance(res, dict):
+                        if res.get("conflict"):
+                            log.add("conflict", label)
+                            break
+                        context.update({k: v for k, v in res.items() if v})
+                    log.add("ok", label)
+                else:
+                    log.add("fail", f"{label}: {result.get('error','?')}")
+                    if not self.auto_mode:
+                        break
+
+            reply = _build_reply(results)
+            try:
+                save_memory(user_input, extract_entities(user_input, results), results)
+            except Exception:
+                pass  # memory save is non-critical
+            yield evt({"type": "done", "plan": display_plan, "results": results, "log": log.entries, "reply": reply})
+        except Exception as e:
+            # Top-level catch: guarantees the stream always closes with a done event
+            yield evt({
+                "type": "done",
+                "plan": [],
+                "results": [{"ok": False, "error": f"Server error: {type(e).__name__}: {e}"}],
+                "log": log.entries,
+                "reply": "Something went wrong on the server. Please try again.",
+            })
 
     # ── Planning ──────────────────────────────────────────────────────────────
 
@@ -495,6 +784,10 @@ class Orchestrator:
         # Previous turn intent
         if self.state.intent:
             ctx_parts.append(f"Previous intent: {self.state.intent}")
+
+        # Last known contact — lets LLM resolve pronouns like "her", "him", "them"
+        if self.state.memory.get("last_email"):
+            ctx_parts.append(f"Last contact: {self.state.memory['last_email']}")
 
         prompt = f"[{' | '.join(ctx_parts)}] {user_input}"
         log.add("llm_call", prompt[:140])
@@ -544,8 +837,8 @@ class Orchestrator:
         ]
 
         # Context chain — accumulates data from step results to pass downstream
-        # Start with only the current request's extracted params (no bleed from prior requests)
-        context = dict(self.state.context)
+        # Seed with current plan params + persistent cross-turn memory (emails, etc.)
+        context = {**self.state.memory, **self.state.context}
 
         # Last meeting available as fallback ONLY for messaging params
         last_meeting = self._last_stored("meetings.json")
@@ -593,6 +886,9 @@ class Orchestrator:
             if result.get("ok"):
                 res = result.get("result", {})
                 if isinstance(res, dict):
+                    if res.get("conflict"):
+                        log.add("conflict", label)
+                        break
                     context.update({k: v for k, v in res.items() if v})
                 log.add("ok", label)
             else:
@@ -634,6 +930,31 @@ class Orchestrator:
         return agent_name, action, params
 
     # ── Helpers ───────────────────────────────────────────────────────────────
+
+    def _maybe_replace_plan(self, user_input: str) -> dict | None:
+        """
+        Handle "/replace <meeting_id>" — rebuild the pending meeting step with
+        replace_existing_id set so the agent deletes the conflict first.
+        Returns None if the input isn't a replace command.
+        """
+        text = user_input.strip()
+        if not text.startswith("/replace"):
+            return None
+        parts = text.split(None, 1)
+        meeting_id = parts[1].strip() if len(parts) > 1 else ""
+        if not meeting_id:
+            return None
+
+        # Find the pending meeting.schedule step saved in state
+        for step in self.state.steps:
+            if step.get("agent") == "meeting" and step.get("action") == "schedule":
+                params = dict(step.get("params") or {})
+                params["replace_existing_id"] = meeting_id
+                return {
+                    "intent": "schedule",
+                    "steps": [{"agent": "meeting", "action": "schedule", "params": params}],
+                }
+        return None
 
     def _last_stored(self, filename: str) -> dict:
         from agents.base import load_data

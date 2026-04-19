@@ -12,37 +12,58 @@
   background: var(--surface);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-lg);
-  padding: 6px 6px 6px 18px;
+  padding: 8px 8px 8px 18px;
   box-shadow: var(--shadow-md);
-  transition: border-color var(--transition), box-shadow var(--transition);
+  overflow: hidden;
 }
 
-.input-bar:focus-within {
-  border-color: rgba(0, 113, 227, 0.4);
-  box-shadow: var(--shadow-md), 0 0 0 3px rgba(0, 113, 227, 0.08);
+/* ── Field wrapper (positions placeholder absolutely over textarea) ── */
+.input-bar__field-wrap {
+  flex: 1;
+  position: relative;
+  min-width: 0;
 }
 
 .input-bar__field {
-  flex: 1;
+  width: 100%;
   border: none;
   outline: none;
   resize: none;
   background: transparent;
   font-size: 15px;
   line-height: 1.5;
-  padding: 8px 0;
+  padding: 6px 0;
   color: var(--text-primary);
-  max-height: 120px;
-}
-
-.input-bar__field::placeholder {
-  color: var(--text-tertiary);
+  height: 24px;
+  max-height: 160px;
+  overflow-y: auto;
+  position: relative;
+  z-index: 1;
+  font-family: inherit;
 }
 
 .input-bar__field:disabled {
   opacity: 0.5;
 }
 
+/* Animated placeholder sits behind the real textarea */
+.input-bar__placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-start;
+  padding: 6px 0;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--text-tertiary);
+  pointer-events: none;
+  white-space: nowrap;
+  overflow: hidden;
+  z-index: 0;
+  user-select: none;
+}
+
+/* ── Mic button ── */
 .input-bar__mic {
   width: 36px;
   height: 36px;
@@ -55,7 +76,7 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  transition: all var(--transition);
+  transition: color var(--transition), background var(--transition);
 }
 
 .input-bar__mic:hover {
@@ -70,7 +91,7 @@
 
 @keyframes pulse-mic {
   0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+  50%       { opacity: 0.5; }
 }
 
 .input-bar__mic:disabled {
@@ -78,6 +99,7 @@
   opacity: 0.4;
 }
 
+/* ── Send / Stop button ── */
 .input-bar__send {
   width: 36px;
   height: 36px;
@@ -90,22 +112,30 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  transition: all var(--transition);
+  transition: background var(--transition), color var(--transition);
 }
 
 .input-bar__send--active {
-  background: var(--text-primary);
+  background: var(--accent);
   color: #fff;
 }
 
+.input-bar__send--stop {
+  background: var(--accent);
+  color: #fff;
+  cursor: pointer;
+}
+
+.input-bar__send--stop:hover,
 .input-bar__send--active:hover {
-  background: #333;
+  background: var(--accent-hover);
 }
 
 .input-bar__send:disabled {
   cursor: default;
 }
 
+/* ── Hint ── */
 .input-bar__hint {
   text-align: center;
   font-size: 11px;

@@ -13,8 +13,12 @@ def _load_json(name: str) -> list[dict]:
     path = os.path.join(DATA_DIR, name)
     if not os.path.exists(path):
         return []
-    with open(path) as f:
-        return json.load(f)
+    try:
+        with open(path) as f:
+            data = json.load(f)
+        return data if isinstance(data, list) else []
+    except (json.JSONDecodeError, OSError):
+        return []
 
 
 def search_all_sources(query: str) -> dict:
