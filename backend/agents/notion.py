@@ -152,11 +152,18 @@ class NotionAgent(BaseAgent):
         if not NOTION_TOKEN:
             return self._local_write(title, content, parent_id)
         if not parent_id:
-            return {
-                "status": "needs_parent",
-                "error": "A parent_id (page or database) is required to create a Notion page",
-                "tip": "Use action_list_pages to find a page ID, then use it as parent_id",
-            }
+            # No parent_id — try to auto-find one, else save locally
+            try:
+                resp = _notion_request("POST", "search", NOTION_TOKEN, {
+                    "filter": {"value": "page", "property": "object"}, "page_size": 1
+                })
+                results = resp.get("results", [])
+                if results:
+                    parent_id = results[0]["id"]
+                else:
+                    return self._local_write(title, content, None)
+            except Exception:
+                return self._local_write(title, content, None)
         try:
             # Build paragraph blocks from content lines
             paragraphs = [

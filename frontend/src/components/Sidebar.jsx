@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import "./Sidebar.css";
 
-const API = "http://localhost:8000";
+const API = "http://localhost:8001";
 
 const AGENTS = [
   { key: "mail", label: "Gmail", icon: "gmail", query: "Show my inbox" },
@@ -174,12 +174,29 @@ function formatSessionDate(ts) {
   return d.toLocaleDateString([], { month: "short", day: "numeric" });
 }
 
-export default function Sidebar({ open, onToggle, onNewChat, sessions = [], activeSessionId, onLoadSession, onDeleteSession, autoMode, onAutoModeToggle, onSend, theme, onThemeToggle }) {
+export default function Sidebar({ open, onToggle, onNewChat, sessions = [], activeSessionId, onLoadSession, onDeleteSession, onRenameSession, autoMode, onAutoModeToggle, onSend, theme, onThemeToggle }) {
   const agentStatus = useAgentStatus();
   const [historyOpen, setHistoryOpen] = useState(true);
+  const [historyQuery, setHistoryQuery] = useState("");
+  const [editingId, setEditingId] = useState(null);
+  const [editValue, setEditValue] = useState("");
 
-  // Reverse so newest is first
-  const sortedSessions = [...sessions].reverse();
+  // Reverse so newest is first, then filter by search
+  const sortedSessions = [...sessions].reverse().filter((s) => {
+    if (!historyQuery.trim()) return true;
+    const q = historyQuery.toLowerCase();
+    if ((s.title || "").toLowerCase().includes(q)) return true;
+    return s.messages?.some((m) => (m.content || m.reply || "").toString().toLowerCase().includes(q));
+  });
+
+  const startEdit = (s) => {
+    setEditingId(s.id);
+    setEditValue(s.title || "");
+  };
+  const commitEdit = () => {
+    if (editingId) onRenameSession?.(editingId, editValue.trim());
+    setEditingId(null);
+  };
 
   return (
     <>
@@ -210,27 +227,62 @@ export default function Sidebar({ open, onToggle, onNewChat, sessions = [], acti
             <span className={`sidebar__status-arrow ${historyOpen ? "sidebar__status-arrow--open" : ""}`}>▾</span>
           </button>
           {historyOpen && (
-            <nav className="sidebar__history">
-              {sortedSessions.map((s) => (
-                <div
-                  key={s.id}
-                  className={`sidebar__history-item ${s.id === activeSessionId ? "sidebar__history-item--active" : ""}`}
-                  onClick={() => onLoadSession(s.id)}
-                >
-                  <span className="sidebar__history-title">{s.title || "New Chat"}</span>
-                  <span className="sidebar__history-date">{formatSessionDate(s.createdAt)}</span>
-                  <button
-                    className="sidebar__history-delete"
-                    onClick={(e) => { e.stopPropagation(); onDeleteSession(s.id); }}
-                    title="Delete"
-                  >
-                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                      <path d="M18 6 6 18M6 6l12 12" />
-                    </svg>
-                  </button>
+            <>
+              {sessions.length > 3 && (
+                <div className="sidebar__history-search">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="11" cy="11" r="8" />
+                    <path d="m21 21-4.35-4.35" />
+                  </svg>
+                  <input
+                    type="text"
+                    value={historyQuery}
+                    onChange={(e) => setHistoryQuery(e.target.value)}
+                    placeholder="Search chats"
+                  />
                 </div>
-              ))}
-            </nav>
+              )}
+              <nav className="sidebar__history">
+                {sortedSessions.length === 0 && historyQuery && (
+                  <div className="sidebar__history-empty">No matches</div>
+                )}
+                {sortedSessions.map((s) => (
+                  <div
+                    key={s.id}
+                    className={`sidebar__history-item ${s.id === activeSessionId ? "sidebar__history-item--active" : ""}`}
+                    onClick={() => editingId !== s.id && onLoadSession(s.id)}
+                    onDoubleClick={(e) => { e.stopPropagation(); startEdit(s); }}
+                  >
+                    {editingId === s.id ? (
+                      <input
+                        autoFocus
+                        className="sidebar__history-rename"
+                        value={editValue}
+                        onChange={(e) => setEditValue(e.target.value)}
+                        onBlur={commitEdit}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") commitEdit();
+                          else if (e.key === "Escape") setEditingId(null);
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                    ) : (
+                      <span className="sidebar__history-title">{s.title || "New Chat"}</span>
+                    )}
+                    <span className="sidebar__history-date">{formatSessionDate(s.createdAt)}</span>
+                    <button
+                      className="sidebar__history-delete"
+                      onClick={(e) => { e.stopPropagation(); onDeleteSession(s.id); }}
+                      title="Delete"
+                    >
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                        <path d="M18 6 6 18M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                ))}
+              </nav>
+            </>
           )}
 
           <div className="sidebar__section-label">Agents</div>

@@ -28,7 +28,7 @@ class DocsAgent(BaseAgent):
                     "content": {"type": "string"},
                     "doc_id": {"type": "string", "description": "Omit to create new"},
                 },
-                "required": ["title", "content"],
+                "required": ["title"],
             },
         },
         {
@@ -84,7 +84,7 @@ class DocsAgent(BaseAgent):
                 }
         return {"doc_id": doc_id, "error": "Not found"}
 
-    def action_write_doc(self, title: str, content: str, doc_id: str = None) -> dict:
+    def action_write_doc(self, title: str, content: str = "", doc_id: str = None) -> dict:
         docs = load_data("docs.json")
 
         if doc_id:

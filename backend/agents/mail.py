@@ -20,20 +20,84 @@ def _decode_header(value: str) -> str:
     return " ".join(decoded)
 
 
-def _get_body(msg) -> str:
+def _strip_html(html: str) -> str:
+    """Quick HTML → text without external deps."""
+    import re
+    s = re.sub(r"<(script|style)[^>]*>.*?</\1>", "", html, flags=re.I | re.S)
+    s = re.sub(r"<br\s*/?>", "\n", s, flags=re.I)
+    s = re.sub(r"</p>", "\n\n", s, flags=re.I)
+    s = re.sub(r"<[^>]+>", "", s)
+    import html as _h
+    s = _h.unescape(s)
+    s = re.sub(r"[ \t]+", " ", s)
+    s = re.sub(r"\n{3,}", "\n\n", s)
+    return s.strip()
+
+
+_FOOTER_MARKERS = [
+    "unsubscribe",
+    "manage your preferences",
+    "manage preferences",
+    "you are receiving this",
+    "you received this email",
+    "this email was sent to",
+    "to stop receiving",
+    "update your email preferences",
+    "click here to unsubscribe",
+]
+
+
+def _trim_footer(text: str) -> str:
+    """Remove unsubscribe/marketing footer from plain-text email body."""
+    if not text:
+        return text
+    lower = text.lower()
+    cut = len(text)
+    for marker in _FOOTER_MARKERS:
+        idx = lower.find(marker)
+        if idx != -1 and idx < cut:
+            # Walk back to the start of that line
+            line_start = text.rfind("\n", 0, idx) + 1
+            if line_start < cut:
+                cut = line_start
+    return text[:cut].rstrip()
+
+
+def _get_body(msg) -> tuple[str, str]:
+    """Return (plain_text, html) for an email message."""
+    plain = ""
+    html = ""
     if msg.is_multipart():
         for part in msg.walk():
-            if part.get_content_type() == "text/plain" and not part.get("Content-Disposition"):
-                try:
-                    return part.get_payload(decode=True).decode(errors="replace")
-                except Exception:
-                    pass
+            ctype = part.get_content_type()
+            disp = str(part.get("Content-Disposition") or "").lower()
+            if "attachment" in disp:
+                continue
+            try:
+                payload = part.get_payload(decode=True)
+                if not payload:
+                    continue
+                text = payload.decode(part.get_content_charset() or "utf-8", errors="replace")
+            except Exception:
+                continue
+            if ctype == "text/plain" and not plain:
+                plain = text
+            elif ctype == "text/html" and not html:
+                html = text
     else:
         try:
-            return msg.get_payload(decode=True).decode(errors="replace")
+            payload = msg.get_payload(decode=True)
+            text = payload.decode(msg.get_content_charset() or "utf-8", errors="replace") if payload else ""
+            if msg.get_content_type() == "text/html":
+                html = text
+            else:
+                plain = text
         except Exception:
             pass
-    return ""
+
+    if not plain.strip() and html.strip():
+        plain = _strip_html(html)
+    return _trim_footer(plain), html
 
 
 class MailAgent(BaseAgent):
@@ -49,6 +113,7 @@ class MailAgent(BaseAgent):
                     "to": {"type": "string"},
                     "subject": {"type": "string"},
                     "body": {"type": "string"},
+                    "html": {"type": "string"},
                 },
                 "required": ["to", "subject", "body"],
             },
@@ -72,10 +137,10 @@ class MailAgent(BaseAgent):
             return {"connected": True, "method": "IMAP/SMTP", "account": EMAIL_USER}
         return {"connected": False, "setup": "Add EMAIL_USER and EMAIL_PASS to .env"}
 
-    def action_send(self, to: str, subject: str, body: str) -> dict:
-        from config import EMAIL_USER, EMAIL_PASS
+    def action_send(self, to: str, subject: str, body: str,
+                     html: str = "", **_kwargs) -> dict:
+        from config import EMAIL_USER, EMAIL_PASS, SENDER_NAME
 
-        # Save to local sent folder
         emails = load_data("emails.json")
         new_email = {
             "id": f"msg_{len(emails) + 1:05d}",
@@ -94,11 +159,16 @@ class MailAgent(BaseAgent):
         smtp_error = None
         if EMAIL_USER and EMAIL_PASS:
             try:
-                msg = MIMEMultipart()
-                msg["From"] = EMAIL_USER
+                msg = MIMEMultipart("alternative") if html else MIMEMultipart("mixed")
+                from_header = f"{SENDER_NAME} <{EMAIL_USER}>" if SENDER_NAME else EMAIL_USER
+                msg["From"] = from_header
                 msg["To"] = to
                 msg["Subject"] = subject
-                msg.attach(MIMEText(body, "plain"))
+
+                msg.attach(MIMEText(body, "plain", "utf-8"))
+                if html:
+                    msg.attach(MIMEText(html, "html", "utf-8"))
+
                 with smtplib.SMTP("smtp.gmail.com", 587) as server:
                     server.starttls()
                     server.login(EMAIL_USER, EMAIL_PASS)
@@ -145,12 +215,14 @@ class MailAgent(BaseAgent):
                     subject = _decode_header(msg.get("Subject", "(no subject)"))
                     from_addr = _decode_header(msg.get("From", ""))
                     date = msg.get("Date", "")
-                    body = _get_body(msg)
+                    body, html = _get_body(msg)
                     result.append({
                         "id": uid.decode(),
                         "from": from_addr,
                         "subject": subject,
-                        "snippet": body[:100].strip(),
+                        "snippet": body[:160].strip(),
+                        "body": body[:8000].strip(),
+                        "html": html[:50000] if html else "",
                         "date": date,
                         "read": False,
                     })

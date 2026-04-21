@@ -80,6 +80,7 @@ class SlackAgent(BaseAgent):
             "webhook_sent": webhook_sent,
             "webhook_error": webhook_error,
             "status": "sent" if webhook_sent else "saved_locally",
+            "url": "https://slack.com" if webhook_sent else "",
         }
 
     def action_read_messages(self, channel: str, limit: int = 10) -> list:

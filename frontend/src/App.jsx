@@ -4,7 +4,7 @@ import ChatArea from "./components/ChatArea";
 import InputBar from "./components/InputBar";
 import "./App.css";
 
-const API = "http://localhost:8000";
+const API = "http://localhost:8001";
 
 function newSession() {
   return { id: Date.now().toString(), title: "New Chat", messages: [], createdAt: Date.now() };
@@ -35,13 +35,7 @@ function saveSessions(sessions) {
 
 export default function App() {
   const [sessions, setSessions] = useState(loadSessions);
-  const [activeId, setActiveId] = useState(null);
-  // Set activeId to the latest session on first render (avoids a duplicate loadSessions call)
-  useEffect(() => {
-    if (!activeId && sessions.length > 0) {
-      setActiveId(sessions[sessions.length - 1].id);
-    }
-  }, [activeId, sessions]);
+  const [activeId, setActiveId] = useState(() => sessions[sessions.length - 1]?.id ?? null);
   const [loading, setLoading] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth > 768);
   const [autoMode, setAutoMode] = useState(false);
@@ -73,7 +67,8 @@ export default function App() {
     if (!text.trim() || loading) return;
     if (window.innerWidth <= 768) setSidebarOpen(false);
 
-    const sessionId = activeId;
+    const sessionId = activeId || sessions[sessions.length - 1]?.id;
+    if (!sessionId) return;
     const userMsg = { role: "user", content: text, ts: Date.now() };
 
     // Set title from first user message

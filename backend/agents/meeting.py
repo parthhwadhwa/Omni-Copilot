@@ -136,6 +136,9 @@ class MeetingAgent(BaseAgent):
                         platform: str = "google_meet", attendees: list = None,
                         replace_existing_id: str = "") -> dict:
         platform = platform if platform in ("google_meet", "zoom") else "google_meet"
+        # Normalise attendees — LLM sometimes passes a comma-separated string
+        if isinstance(attendees, str):
+            attendees = [a.strip() for a in attendees.split(",") if a.strip()]
 
         if replace_existing_id:
             self._delete_by_id(replace_existing_id)

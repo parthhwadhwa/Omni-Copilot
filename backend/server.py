@@ -2,6 +2,7 @@
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from orchestrator import Orchestrator
 
@@ -21,6 +22,19 @@ def chat(req: ChatRequest):
     orch.set_auto_mode(req.auto_mode)
     response = orch.process(req.message)
     return response
+
+
+@app.post("/chat/stream")
+def chat_stream(req: ChatRequest):
+    orch.set_auto_mode(req.auto_mode)
+    return StreamingResponse(
+        orch.process_stream(req.message),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "X-Accel-Buffering": "no",
+        },
+    )
 
 
 @app.get("/tools")

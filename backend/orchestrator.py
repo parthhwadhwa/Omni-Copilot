@@ -64,6 +64,29 @@ def _parse_time(text: str) -> str | None:
     return None
 
 
+def _format_list_for_content(items: list) -> str:
+    """Convert a list result (e.g. emails) into plain text for use as Notion/Docs content."""
+    if not items:
+        return ""
+    lines = []
+    for item in items:
+        if not isinstance(item, dict):
+            lines.append(f"• {str(item)[:150]}")
+            continue
+        primary = ""
+        for k in ("subject", "title", "name", "from", "repo", "full_name"):
+            if item.get(k):
+                primary = str(item[k])[:120]
+                break
+        secondary = ""
+        for k in ("snippet", "body", "date", "start", "url", "html_url"):
+            if item.get(k):
+                secondary = " — " + str(item[k])[:120]
+                break
+        lines.append(f"• {primary}{secondary}" if primary else f"• {str(item)[:150]}")
+    return "\n".join(lines)
+
+
 def _get_param_schema(agent_name: str, action: str) -> dict:
     """Return the full param schema for an agent action."""
     cls = ALL_AGENTS.get(agent_name)
@@ -257,6 +280,33 @@ class ConversationState:
 # Meeting invite body builder — produces plain + HTML version
 # ---------------------------------------------------------------------------
 
+def _build_gcal_link(title: str, start_raw: str, duration: int, link: str) -> str:
+    """Build a Google Calendar 'Add to Calendar' URL from event details."""
+    import urllib.parse
+    import datetime as dt_mod
+    try:
+        if "T" in start_raw:
+            base = dt_mod.datetime.fromisoformat(start_raw.replace("Z", "+00:00"))
+        else:
+            base = dt_mod.datetime.fromisoformat(f"{start_raw}T09:00:00")
+        if base.tzinfo is None:
+            base = base.replace(tzinfo=dt_mod.timezone(dt_mod.timedelta(hours=5, minutes=30)))
+        utc = dt_mod.timezone.utc
+        start_utc = base.astimezone(utc).strftime("%Y%m%dT%H%M%SZ")
+        end_utc = (base + dt_mod.timedelta(minutes=duration)).astimezone(utc).strftime("%Y%m%dT%H%M%SZ")
+        dates = f"{start_utc}/{end_utc}"
+    except Exception:
+        dates = ""
+
+    params = {"action": "TEMPLATE", "text": title}
+    if dates:
+        params["dates"] = dates
+    if link:
+        params["details"] = f"Join: {link}"
+        params["location"] = link
+    return "https://calendar.google.com/calendar/render?" + urllib.parse.urlencode(params)
+
+
 def _build_meeting_invite(src: dict) -> tuple[str, str]:
     """Return (plain_text, html) body for a meeting invite email."""
     from config import EMAIL_USER
@@ -278,6 +328,8 @@ def _build_meeting_invite(src: dict) -> tuple[str, str]:
     elif start_raw:
         date_str = start_raw
 
+    gcal_link = _build_gcal_link(title, start_raw, duration, link) if start_raw else ""
+
     from config import SENDER_NAME
     sender = SENDER_NAME or ((EMAIL_USER or "").split("@")[0].title() if EMAIL_USER else "")
 
@@ -295,15 +347,21 @@ def _build_meeting_invite(src: dict) -> tuple[str, str]:
     plain_lines.append(f"📍 Platform: {platform}")
     if link:
         plain_lines.append(f"🔗 Join: {link}")
+    if gcal_link:
+        plain_lines.append(f"📆 Add to Google Calendar: {gcal_link}")
     plain_lines.extend(["", "See you there!", "", f"Regards,", sender or "—"])
     plain = "\n".join(plain_lines)
 
-    link_block = (
+    join_block = (
         f'<a href="{link}" style="display:inline-block;background:#1a73e8;color:#fff;text-decoration:none;padding:12px 24px;border-radius:8px;font-weight:600;font-size:14px;">Join meeting</a>'
-        f'<p style="margin:20px 0 0;font-size:13px;color:#5f6368;word-break:break-all;">Or paste this link: <a href="{link}" style="color:#1a73e8;">{link}</a></p>'
+        f'<p style="margin:12px 0 0;font-size:13px;color:#5f6368;word-break:break-all;">Or paste this link: <a href="{link}" style="color:#1a73e8;">{link}</a></p>'
     ) if link else (
-        '<p style="margin:20px 0 0;font-size:13px;color:#5f6368;">The meeting link will be shared separately.</p>'
+        '<p style="margin:20px 0 0;font-size:13px;color:#5f6368;">The meeting link will be shared by the organizer.</p>'
     )
+
+    gcal_block = (
+        f'<p style="margin:16px 0 0;"><a href="{gcal_link}" style="display:inline-block;background:#fff;color:#1a73e8;border:1px solid #dadce0;text-decoration:none;padding:10px 20px;border-radius:8px;font-weight:600;font-size:13px;">📆 Add to Google Calendar</a></p>'
+    ) if gcal_link else ""
 
     html = f"""<!DOCTYPE html><html><body style="font-family:-apple-system,Segoe UI,Arial,sans-serif;color:#202124;margin:0;padding:24px;background:#f6f8fa;">
 <div style="max-width:560px;margin:0 auto;background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;">
@@ -320,7 +378,8 @@ def _build_meeting_invite(src: dict) -> tuple[str, str]:
 <tr><td style="padding:8px 0;color:#5f6368;">⏱ Duration</td><td style="padding:8px 0;font-weight:500;">{duration} minutes</td></tr>
 <tr><td style="padding:8px 0;color:#5f6368;">📍 Platform</td><td style="padding:8px 0;font-weight:500;">{platform}</td></tr>
 </table>
-{link_block}
+{join_block}
+{gcal_block}
 <hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0;">
 <p style="margin:0;font-size:14px;color:#5f6368;">Regards,<br><strong style="color:#202124;">{sender or 'OmniCopilot'}</strong></p>
 </div></div></body></html>"""
@@ -394,9 +453,12 @@ def _validate_and_fill(params: dict, agent_name: str, action: str,
         else:
             params[text_keys[0]] = "Shared from OmniCopilot"
 
-    # Default empty content for docs/notes agents so they never block on missing content
+    # Fill content for docs/notion from upstream step results if not already set
     if agent_name in ("docs", "drive", "notion") and "content" in keys and not params.get("content"):
-        params["content"] = ""
+        if context.get("prev_result_text"):
+            params["content"] = context["prev_result_text"]
+        else:
+            params["content"] = " "  # non-empty so required check passes
 
     # Apply defaults: schema-declared defaults first, then DEFAULTS dict
     schema_props = _get_param_schema(agent_name, action).get("properties", {})
@@ -739,8 +801,12 @@ class Orchestrator:
                     if isinstance(res, dict):
                         if res.get("conflict"):
                             log.add("conflict", label)
-                            break
-                        context.update({k: v for k, v in res.items() if v})
+                            existing = res.get("existing") or {}
+                            context.update({k: v for k, v in existing.items() if v})
+                        else:
+                            context.update({k: v for k, v in res.items() if v})
+                    elif isinstance(res, list):
+                        context["prev_result_text"] = _format_list_for_content(res)
                     log.add("ok", label)
                 else:
                     log.add("fail", f"{label}: {result.get('error','?')}")
@@ -888,8 +954,14 @@ class Orchestrator:
                 if isinstance(res, dict):
                     if res.get("conflict"):
                         log.add("conflict", label)
-                        break
-                    context.update({k: v for k, v in res.items() if v})
+                        # Propagate existing meeting details so downstream steps still work
+                        existing = res.get("existing") or {}
+                        context.update({k: v for k, v in existing.items() if v})
+                        # Continue — don't break, let email/slack steps still fire
+                    else:
+                        context.update({k: v for k, v in res.items() if v})
+                elif isinstance(res, list):
+                    context["prev_result_text"] = _format_list_for_content(res)
                 log.add("ok", label)
             else:
                 log.add("fail", f"{label}: {result.get('error','?')}")

@@ -16,7 +16,7 @@ from config import GROQ_API_KEY
 from agents import ALL_AGENTS
 
 MODEL = "llama-3.3-70b-versatile"
-MAX_TOKENS = 512
+MAX_TOKENS = 1024
 TEMPERATURE = 0  # strict — no randomness
 
 _client: Groq | None = None
@@ -163,7 +163,7 @@ def _validate_plan(plan: dict, valid_map: dict[str, set[str]]) -> dict:
 
     intent = plan.get("intent", "unknown")
     if intent not in allowed:
-        return {"intent": "unknown", "steps": []}
+        intent = "unknown"  # normalise label but keep steps below
 
     raw_steps = plan.get("steps", [])
     if not isinstance(raw_steps, list):

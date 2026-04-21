@@ -21,6 +21,21 @@ _load_env()
 
 EMAIL_USER = os.environ.get("EMAIL_USER", "")
 EMAIL_PASS = os.environ.get("EMAIL_PASS", "")
+
+
+def _derive_sender_name(email_user: str) -> str:
+    """Turn parthwadhwa15@gmail.com → 'Parth Wadhwa'."""
+    if not email_user:
+        return ""
+    local = email_user.split("@")[0]
+    # Strip trailing digits, split on separators, title-case
+    import re
+    local = re.sub(r"\d+$", "", local)
+    parts = re.split(r"[._\-+]", local)
+    return " ".join(p.capitalize() for p in parts if p)
+
+
+SENDER_NAME = os.environ.get("SENDER_NAME") or _derive_sender_name(EMAIL_USER)
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "")
 SLACK_WEBHOOK_URL = os.environ.get("SLACK_WEBHOOK_URL", "")
 DISCORD_WEBHOOK_URL = os.environ.get("DISCORD_WEBHOOK_URL", "")
