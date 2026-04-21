@@ -28,7 +28,7 @@ OmniCopilot/
 | Google Calendar | Create, list, update, delete events |
 | Google Drive | Upload, list, read files |
 | Google Forms | Create forms, read responses |
-| Google Meet | Real meeting links via Calendar API |
+| Google Meet | Real meeting links via Calendar API, invite emails with Join + Add to Calendar buttons |
 | Zoom | Real meeting links via Zoom API |
 | Slack | Send messages via webhook |
 | Discord | Send messages via webhook |
@@ -71,7 +71,7 @@ cd backend
 ```bash
 # Backend
 cd backend
-../venv/bin/uvicorn server:app --reload --port 8000
+../venv/bin/uvicorn server:app --reload --port 8001
 
 # Frontend (separate terminal)
 cd frontend
