@@ -26,8 +26,18 @@ def _forms(method: str, path: str, token: str, body: dict = None) -> dict:
         return json.loads(raw) if raw.strip() else {}
 
 
-def _question_to_gforms(q: dict) -> dict:
+def _normalise_question(q) -> dict:
+    """Accept a question as either a plain string or a dict."""
+    if isinstance(q, str):
+        return {"text": q, "type": "short_text"}
+    if isinstance(q, dict):
+        return q
+    return {"text": str(q), "type": "short_text"}
+
+
+def _question_to_gforms(q) -> dict:
     """Convert our question format to Google Forms API item format."""
+    q = _normalise_question(q)
     qtype = q.get("type", "short_text")
     text = q.get("text") or q.get("question") or q.get("label") or ""
 
@@ -143,6 +153,9 @@ class FormsAgent(BaseAgent):
             return self._local_create(title, questions)
 
         try:
+            # Normalise questions — LLM sometimes sends plain strings
+            questions = [_normalise_question(q) for q in (questions or [])]
+
             # Step 1: create the form shell
             form = _forms("POST", "/forms", token, {"info": {"title": title}})
             form_id = form.get("formId", "")
@@ -259,6 +272,7 @@ class FormsAgent(BaseAgent):
     # ── Local fallbacks ───────────────────────────────────────────────────────
 
     def _local_create(self, title: str, questions: list) -> dict:
+        questions = [_normalise_question(q) for q in (questions or [])]
         form_id = f"form_{uuid.uuid4().hex[:8]}"
         record = {
             "form_id": form_id,

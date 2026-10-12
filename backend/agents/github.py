@@ -153,7 +153,18 @@ class GitHubAgent(BaseAgent):
 
     def _token(self) -> str | None:
         from config import GITHUB_TOKEN
-        return GITHUB_TOKEN or None
+        if GITHUB_TOKEN:
+            return GITHUB_TOKEN
+        import shutil
+        import subprocess
+        if shutil.which("gh"):
+            try:
+                token = subprocess.check_output(["gh", "auth", "token"], text=True, timeout=3).strip()
+                if token:
+                    return token
+            except Exception:
+                pass
+        return None
 
     def action_status(self) -> dict:
         token = self._token()

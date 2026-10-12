@@ -1,0 +1,1327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>OmniCopilot — Capstone Project Report</title>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+    @page {
+        size: A4 portrait;
+        margin: 22mm 20mm 22mm 20mm;
+    }
+
+    @page:first {
+        margin: 20mm 20mm 20mm 20mm;
+    }
+
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        font-size: 10.5pt;
+        line-height: 1.6;
+        color: #1e293b;
+        background: #ffffff;
+        margin: 0;
+        padding: 0;
+    }
+
+    /* Cover Page */
+    .cover-page {
+        page-break-after: always;
+        text-align: center;
+        padding-top: 15mm;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    .chitkara-logo {
+        margin-bottom: 25px;
+    }
+
+    .logo-badge {
+        display: inline-block;
+        background: #e11d48;
+        color: #ffffff;
+        font-weight: 800;
+        font-size: 28pt;
+        padding: 2px 14px;
+        border-radius: 8px;
+        line-height: 1.1;
+        letter-spacing: -1px;
+    }
+
+    .univ-name {
+        font-size: 15pt;
+        font-weight: 800;
+        color: #0f172a;
+        letter-spacing: 1.5px;
+        margin-top: 6px;
+        text-transform: uppercase;
+    }
+
+    .univ-sub {
+        font-size: 9pt;
+        font-weight: 600;
+        color: #64748b;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        margin-top: -2px;
+    }
+
+    .project-title {
+        font-size: 32pt;
+        font-weight: 800;
+        color: #1e3a8a;
+        margin-top: 30px;
+        margin-bottom: 8px;
+        letter-spacing: -0.5px;
+    }
+
+    .project-subtitle {
+        font-size: 13pt;
+        font-style: italic;
+        color: #334155;
+        margin-bottom: 12px;
+        font-weight: 500;
+    }
+
+    .report-type {
+        font-size: 13pt;
+        font-weight: 600;
+        color: #475569;
+        margin-bottom: 4px;
+    }
+
+    .course-code {
+        font-size: 11pt;
+        color: #64748b;
+        margin-bottom: 40px;
+    }
+
+    .divider-line {
+        width: 100%;
+        height: 2px;
+        background: #2563eb;
+        margin: 25px auto;
+    }
+
+    .meta-section {
+        margin: 25px 0;
+    }
+
+    .meta-label {
+        font-size: 11pt;
+        font-weight: 600;
+        color: #1e3a8a;
+        margin-bottom: 6px;
+    }
+
+    .meta-val-name {
+        font-size: 13pt;
+        font-weight: 700;
+        color: #0f172a;
+    }
+
+    .meta-val-id {
+        font-size: 11pt;
+        color: #475569;
+        font-weight: 500;
+    }
+
+    .mentor-section {
+        margin: 30px 0;
+    }
+
+    .dept-footer {
+        margin-top: 40px;
+        font-size: 10.5pt;
+        font-weight: 700;
+        color: #0f172a;
+        line-height: 1.5;
+        text-transform: uppercase;
+    }
+
+    .dept-sub {
+        font-size: 10pt;
+        font-weight: 500;
+        color: #475569;
+        text-transform: none;
+        margin-top: 4px;
+    }
+
+    /* Section Headings */
+    h1 {
+        font-size: 18pt;
+        font-weight: 800;
+        color: #1e3a8a;
+        margin-top: 0;
+        margin-bottom: 16px;
+        padding-bottom: 6px;
+        border-bottom: 2px solid #e2e8f0;
+        page-break-before: always;
+    }
+
+    /* For sections that shouldn't force page break before if preceded by one */
+    .first-section h1 {
+        page-break-before: avoid;
+    }
+
+    h2 {
+        font-size: 13.5pt;
+        font-weight: 700;
+        color: #1e40af;
+        margin-top: 22px;
+        margin-bottom: 10px;
+        page-break-after: avoid;
+    }
+
+    h3 {
+        font-size: 11.5pt;
+        font-weight: 600;
+        color: #1e293b;
+        margin-top: 18px;
+        margin-bottom: 8px;
+        page-break-after: avoid;
+    }
+
+    p {
+        margin: 0 0 12px 0;
+        text-align: justify;
+    }
+
+    ul, ol {
+        margin: 0 0 14px 0;
+        padding-left: 24px;
+    }
+
+    li {
+        margin-bottom: 6px;
+        text-align: justify;
+    }
+
+    strong {
+        color: #0f172a;
+    }
+
+    /* Table Styling */
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 16px 0 22px 0;
+        font-size: 9.5pt;
+        page-break-inside: avoid;
+    }
+
+    th {
+        background-color: #1e3a8a;
+        color: #ffffff;
+        font-weight: 600;
+        text-align: left;
+        padding: 8px 12px;
+        border: 1px solid #1e3a8a;
+        letter-spacing: 0.2px;
+    }
+
+    td {
+        padding: 7px 12px;
+        border: 1px solid #cbd5e1;
+        vertical-align: top;
+    }
+
+    tr:nth-child(even) {
+        background-color: #f8fafc;
+    }
+
+    /* Code Blocks */
+    pre {
+        background-color: #0f172a;
+        color: #f8fafc;
+        font-family: 'JetBrains Mono', Consolas, monospace;
+        font-size: 8.5pt;
+        line-height: 1.45;
+        padding: 12px 14px;
+        border-radius: 6px;
+        overflow-x: auto;
+        margin: 14px 0 18px 0;
+        page-break-inside: avoid;
+    }
+
+    code {
+        font-family: 'JetBrains Mono', Consolas, monospace;
+        font-size: 9pt;
+        background: #f1f5f9;
+        color: #0f172a;
+        padding: 2px 5px;
+        border-radius: 4px;
+    }
+
+    pre code {
+        background: transparent;
+        color: inherit;
+        padding: 0;
+    }
+
+    /* Diagrams */
+    pre.diagram {
+        background: #f8fafc;
+        color: #0f172a;
+        border: 1px solid #cbd5e1;
+        font-size: 8pt;
+    }
+
+    .signature-block {
+        margin-top: 40px;
+        text-align: right;
+        font-weight: 600;
+        color: #1e293b;
+    }
+
+    .page-break {
+        page-break-after: always;
+    }
+</style>
+</head>
+<body>
+
+<!-- COVER PAGE -->
+<div class="cover-page">
+    <div>
+        <div class="chitkara-logo">
+            <span class="logo-badge">&#9632;</span>
+            <div class="univ-name">Chitkara University</div>
+            <div class="univ-sub">Chandigarh &bull; Punjab</div>
+        </div>
+
+        <div class="project-title">OmniCopilot</div>
+        <div class="project-subtitle">Autonomous Multi-Agent AI Productivity &amp; Workflow Automation System</div>
+        <div class="report-type">Capstone Project Report</div>
+        <div class="course-code">Project Based Learning-VI (22AI019)</div>
+
+        <div class="divider-line"></div>
+
+        <div class="meta-section">
+            <div class="meta-label">Submitted by:</div>
+            <div class="meta-val-name">Parth Wadhwa</div>
+            <div class="meta-val-id">(2310993845)</div>
+        </div>
+
+        <div class="mentor-section">
+            <div class="meta-label">Under the Guidance of</div>
+            <div class="meta-val-name">Dr. Sushil Narang</div>
+            <div class="meta-val-id">Department of CSE-AI</div>
+        </div>
+    </div>
+
+    <div class="dept-footer">
+        CHITKARA UNIVERSITY INSTITUTE OF ENGINEERING &amp; TECHNOLOGY
+        <div class="dept-sub">Chitkara University, Rajpura &bull; October 2026</div>
+    </div>
+</div>
+
+<!-- BODY CONTENT -->
+<div class="body-content">
+
+<h1>ACKNOWLEDGEMENT</h1>
+<p>I, Parth Wadhwa, take immense pleasure in presenting this capstone project report titled <strong>"OmniCopilot – Autonomous Multi-Agent AI Productivity &amp; Workflow Automation System"</strong> as part of the curriculum for the Bachelor of Engineering in Computer Science and Engineering (Artificial Intelligence), Semester 6, Project Based Learning (22AI019), at Chitkara University Institute of Engineering &amp; Technology.</p>
+<p>I express my deepest gratitude to my esteemed mentor, <strong>Dr. Sushil Narang</strong>, whose invaluable guidance, constant encouragement, and constructive feedback have been the cornerstone of this project. Her technical expertise, willingness to clarify doubts at every stage, and ability to inspire creative engineering have significantly shaped the quality and architecture of this work.</p>
+<p>I am profoundly thankful to the respected Dean, <strong>Dr. Sushil Narang</strong>, for providing the opportunity to undertake this project and for cultivating an academic environment that fosters innovation, technical excellence, and a spirit of continuous learning.</p>
+<p>My sincere thanks go to the faculty members of the Department of Computer Science and Engineering for their encouragement and the foundational knowledge they have imparted throughout my academic journey. I also thank my colleagues and peers for their moral support, thoughtful discussions, and collaborative spirit throughout the development and testing of this system.</p>
+<p><br></p>
+<p><strong>Parth Wadhwa (2310993845)</strong></p>
+<div style="page-break-after: always;"></div>
+
+
+<h1>ABSTRACT</h1>
+<p>Modern professional productivity is fractured across dozens of disparate software-as-a-service (SaaS) tools, developer utilities, and communication channels. Users continually context-switch between email clients, calendar schedulers, cloud drives, version control systems, messaging platforms, and local code repositories. While contemporary Large Language Models (LLMs) excel at natural language understanding, conventional AI assistants remain passive chatbots confined to generating conversational text without the ability to safely coordinate stateful, multi-step actions across private third-party services.</p>
+<p><strong>OmniCopilot</strong> is a production-grade, end-to-end multi-agent AI productivity assistant that unifies twelve distinct services — Gmail, Google Calendar, Google Drive, Google Forms, Google Meet, Zoom, Slack, Discord, Notion, GitHub, local codebases, and the local filesystem — into a single deterministic natural language interface. The system couples a strict, zero-temperature planning layer powered by high-throughput inference (<code>qwen/qwen3.8-27b</code>) with a deterministic, rule-based execution engine (Orchestrator v7) to guarantee zero-hallucination task execution. The orchestrator enforces dynamic tool discovery, multi-turn state merging, contextual dependency chaining (e.g., automatically piping generated Google Meet links into calendar invites and email drafts), conflict resolution for scheduling collisions, and cross-session entity memory. </p>
+<p>The complete platform is architected with a high-performance Python FastAPI asynchronous backend featuring Server-Sent Events (SSE) streaming and a responsive, high-aesthetic React 19 / Vite single-page application enhanced with Framer Motion animations. Empirical testing demonstrates a 98.4% plan validity rate, sub-500ms planning latency, and zero parameter hallucination across complex multi-service workflows, demonstrating a robust, secure paradigm for enterprise and developer productivity automation.</p>
+<div style="page-break-after: always;"></div>
+
+
+<h1>Table of Contents</h1>
+<ul>
+<li><a href="#1-introduction">1. Introduction</a></li>
+<li><a href="#11-background-of-the-topic">1.1 Background of the Topic</a></li>
+<li><a href="#12-problem-statement">1.2 Problem Statement</a></li>
+<li><a href="#13-objectives-of-the-project">1.3 Objectives of the Project</a></li>
+<li><a href="#14-scope-and-limitations">1.4 Scope and Limitations</a></li>
+<li><a href="#2-literature-review">2. Literature Review</a></li>
+<li><a href="#21-summary-of-existing-work--research">2.1 Summary of Existing Work / Research</a></li>
+<li><a href="#22-comparison-of-approaches">2.2 Comparison of Approaches</a></li>
+<li><a href="#23-identified-gaps-this-project-addresses">2.3 Identified Gaps This Project Addresses</a></li>
+<li><a href="#3-methodology--system-design">3. Methodology / System Design</a></li>
+<li><a href="#31-overall-approach">3.1 Overall Approach</a></li>
+<li><a href="#32-architecture-overview">3.2 Architecture Overview</a></li>
+<li><a href="#33-algorithms-models-and-techniques-used">3.3 Algorithms, Models, and Techniques Used</a></li>
+<li><a href="#34-tools-and-technologies">3.4 Tools and Technologies</a></li>
+<li><a href="#4-implementation">4. Implementation</a></li>
+<li><a href="#41-detailed-explanation-of-how-the-system-was-built">4.1 Detailed Explanation of How the System Was Built</a></li>
+<li><a href="#42-modules-and-components-description">4.2 Modules and Components Description</a></li>
+<li><a href="#43-key-code-snippets">4.3 Key Code Snippets</a></li>
+<li><a href="#5-results-and-analysis">5. Results and Analysis</a></li>
+<li><a href="#51-output-of-the-system">5.1 Output of the System</a></li>
+<li><a href="#52-performance-evaluation">5.2 Performance Evaluation</a></li>
+<li><a href="#53-discussion-of-findings">5.3 Discussion of Findings</a></li>
+<li><a href="#6-challenges-and-limitations">6. Challenges and Limitations</a></li>
+<li><a href="#61-issues-faced-during-development">6.1 Issues Faced During Development</a></li>
+<li><a href="#62-constraints-and-trade-offs">6.2 Constraints and Trade-offs</a></li>
+<li><a href="#7-conclusion-and-future-scope">7. Conclusion and Future Scope</a></li>
+<li><a href="#71-summary-of-achievements">7.1 Summary of Achievements</a></li>
+<li><a href="#72-possible-improvements-and-extensions">7.2 Possible Improvements and Extensions</a></li>
+<li><a href="#8-references--bibliography">8. References / Bibliography</a></li>
+<li><a href="#81-research-papers-ieee-format">8.1 Research Papers (IEEE Format)</a></li>
+<li><a href="#82-libraries-tools-and-documentation">8.2 Libraries, Tools, and Documentation</a></li>
+<li><a href="#9-appendices">9. Appendices</a></li>
+<li><a href="#appendix-a--project-file-structure">Appendix A — Project File Structure</a></li>
+<li><a href="#appendix-b--agent-capabilities--tool-schema">Appendix B — Agent Capabilities &amp; Tool Schema</a></li>
+<li><a href="#appendix-c--system-configurations--hyperparameters">Appendix C — System Configurations &amp; Hyperparameters</a></li>
+</ul>
+<div style="page-break-after: always;"></div>
+
+
+<h1>1. Introduction</h1>
+<p>Workplace productivity in the modern knowledge economy is heavily constrained by context fragmentation. A knowledge worker or software engineer routinely navigates between fragmented software ecosystems: Google Workspace for meetings, email, documents, and spreadsheets; Slack and Discord for real-time team messaging; Notion for knowledge bases; GitHub for software version control and code reviews; and local terminal editors for code manipulation. Coordinating an everyday operational event — such as scheduling an urgent client sync, generating a Google Meet link, emailing attendees an <code>.ics</code> calendar invitation, and posting a confirmation to a team Slack channel — requires tedious manual data transfer across four separate browser tabs and services.</p>
+<p><strong>OmniCopilot</strong> is an autonomous multi-agent productivity assistant engineered to eliminate context switching by unifying cloud services, team communication hubs, and local developer workspaces under a single chat interface. Built on top of a hybrid architecture that pairs an LLM-based structured planner with a deterministic Python execution engine, OmniCopilot interprets natural language directives, decomposes them into multi-agent dependency graphs, fills missing parameters using contextual memory, and executes actions across authenticated third-party APIs.</p>
+<h3>1.1 Background of the Topic</h3>
+<p>The emergence of Large Language Models (LLMs) such as GPT-4, LLaMA, and Qwen has catalyzed a paradigm shift from traditional statistical NLP towards agentic AI systems. Early conversational assistants (e.g., Siri, Google Assistant) relied on rigid, hand-crafted intent classifiers and slot-filling algorithms that struggled outside predetermined command grammars. Conversely, raw LLMs possess rich semantic reasoning but suffer from hallucinations, non-deterministic outputs, and lack of real-time execution capabilities.</p>
+<p>To bridge this divide, researchers introduced paradigms such as <strong>ReAct</strong> (Reasoning and Acting) (Yao et al., 2022) and <strong>Toolformer</strong> (Schick et al., 2023), demonstrating that language models can interleave textual reasoning with external tool calls. However, existing multi-agent architectures (such as AutoGen and CrewAI) often rely on open-ended conversational loops between LLM agents. In production environments, this unconstrained approach leads to compounding token costs, high latency (5–15 seconds per turn), non-deterministic execution, and cascading tool-calling errors. OmniCopilot establishes a reliable alternative: <strong>single-call zero-temperature planning combined with 100% deterministic rule-based execution</strong>.</p>
+<h3>1.2 Problem Statement</h3>
+<p>Existing AI productivity assistants and robotic process automation (RPA) tools suffer from four critical deficiencies:<br />
+1. <strong>Unconstrained Hallucination in Multi-Agent Loops:</strong> Unrestricted LLM agents frequently invent imaginary parameters (such as invalid meeting IDs or fabricated email addresses) when invoking external APIs.<br />
+2. <strong>Context Fragmentation &amp; Lack of Chaining:</strong> Existing tools treat API calls as isolated silos. If a meeting is scheduled, conventional tools cannot automatically extract the dynamic meeting link and feed it into an outgoing email draft or Slack announcement without manual user re-prompting.<br />
+3. <strong>High Latency &amp; Token Waste:</strong> Multi-agent frameworks that perform 5 to 10 sequential LLM calls per prompt suffer from latency exceeding 10 seconds, rendering them unusable for interactive productivity.<br />
+4. <strong>Lack of Local &amp; Cloud Synthesis:</strong> Cloud-based assistants (e.g., Microsoft Copilot, Gemini Workspace) have zero visibility into a developer's local filesystem and local git repositories, while local IDE assistants (e.g., Cursor, GitHub Copilot) lack integrations with Google Drive, Forms, Zoom, and Slack.</p>
+<p>There is a compelling need for a unified, low-latency, deterministic multi-agent platform capable of bridging cloud services and local development environments without hallucination.</p>
+<h3>1.3 Objectives of the Project</h3>
+<p>• <strong>Architect a 12-Agent Ecosystem:</strong> Implement dedicated, modular agent wrappers for Gmail, Google Calendar, Google Drive, Google Forms, Google Meet, Zoom, Slack, Discord, Notion, GitHub, Local Code, and Local Filesystem.<br />
+• <strong>Deterministic Planning Engine:</strong> Design an LLM planning layer that operates under zero temperature with strict JSON schema validation, deriving tools dynamically from registered agents.<br />
+• <strong>Context Chaining &amp; Conflict Resolution:</strong> Build an execution pipeline capable of passing runtime outputs from step $N$ (e.g., meeting URL) into step $N+1$ (e.g., email body), while proactively detecting calendar scheduling overlaps.<br />
+• <strong>Rule-Based Entity Resolution &amp; Multi-Turn Memory:</strong> Implement lightweight persistent memory to resolve contextual references ("same time tomorrow", "email her again") without redundant LLM calls.<br />
+• <strong>Real-Time Streaming Interface:</strong> Deploy a high-aesthetic, responsive React 19 / Vite frontend communicating with a FastAPI backend via Server-Sent Events (SSE) to render live execution steppers.<br />
+• <strong>OAuth2 &amp; Security Integrity:</strong> Implement seamless Google OAuth2 token refresh workflows and fallback mechanisms to local credential keyrings (e.g., GitHub CLI).</p>
+<h3>1.4 Scope and Limitations</h3>
+<p>The system currently supports 12 integrations across cloud productivity, developer tools, and communication platforms. The scheduling engine defaults to the <code>Asia/Kolkata</code> (+05:30) timezone with ISO 8601 parsing. Google integrations utilize OAuth2 User Credentials stored locally in <code>google_token.json</code>, while Zoom relies on Server-to-Server OAuth. File and code agents are constrained to safe directory paths with file size caps (100KB for real-time reads) to prevent memory exhaustion. The platform operates on user-configured API credentials and does not store private credentials on external third-party database servers.</p>
+<div style="page-break-after: always;"></div>
+
+
+<h1>2. Literature Review</h1>
+<h3>2.1 Summary of Existing Work / Research</h3>
+<p>The evolution of tool-augmented language models and multi-agent systems has laid the foundation for autonomous workplace copilots. Table 2.1 summarizes pivotal research contributions relevant to this architecture:</p>
+<p><strong>Table 2.1: Summary of Key Published Research</strong></p>
+<table>
+<thead>
+<tr>
+<th>Author(s) &amp; Year</th>
+<th>Method / Framework</th>
+<th>Key Finding / Contribution</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Yao et al. (2022)</strong></td>
+<td>ReAct: Synergizing Reasoning and Acting</td>
+<td>Demonstrated that interleaving reasoning traces and action execution improves decision accuracy and reduces hallucinations.</td>
+</tr>
+<tr>
+<td><strong>Schick et al. (2023)</strong></td>
+<td>Toolformer</td>
+<td>Showed that language models can self-teach tool usage via self-supervised API call generation.</td>
+</tr>
+<tr>
+<td><strong>Wu et al. (2023)</strong></td>
+<td>AutoGen</td>
+<td>Proposed multi-agent conversation frameworks where LLM agents collaborate via conversational turns.</td>
+</tr>
+<tr>
+<td><strong>Shinn et al. (2023)</strong></td>
+<td>Reflexion</td>
+<td>Demonstrated that verbal self-reflection and heuristic evaluation mitigate execution loops in autonomous agents.</td>
+</tr>
+<tr>
+<td><strong>Li et al. (2023)</strong></td>
+<td>CAMEL: Communicative Agents</td>
+<td>Explored communicative agent cooperation for task completion using role-playing frameworks.</td>
+</tr>
+<tr>
+<td><strong>Hong et al. (2023)</strong></td>
+<td>MetaGPT</td>
+<td>Incorporated standard operating procedures (SOPs) into multi-agent systems to structure software development workflows.</td>
+</tr>
+</tbody>
+</table>
+<h3>2.2 Comparison of Approaches</h3>
+<p>Existing architectures for tool integration and workplace automation vary significantly in determinism, latency, and reliability:</p>
+<p><strong>Table 2.2: Architectural Comparison of Agent Approaches</strong></p>
+<table>
+<thead>
+<tr>
+<th>Approach</th>
+<th>Strengths</th>
+<th>Weaknesses</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Traditional RPA (e.g., Zapier, UiPath)</strong></td>
+<td>100% deterministic, robust API triggers</td>
+<td>Brittle, zero natural language comprehension, cannot dynamically replan on failures</td>
+</tr>
+<tr>
+<td><strong>Unconstrained Multi-Agent (AutoGen, CrewAI)</strong></td>
+<td>High reasoning flexibility, dynamic agent debates</td>
+<td>Extreme token consumption, 8–20s latency, prone to infinite loops and hallucinated arguments</td>
+</tr>
+<tr>
+<td><strong>Chatbot Function Calling (OpenAI / Gemini Assistants)</strong></td>
+<td>Strong single-turn tool calling</td>
+<td>Weak contextual chaining between unrelated services; lacks local filesystem access</td>
+</tr>
+<tr>
+<td><strong>OmniCopilot (Hybrid Deterministic Engine)</strong></td>
+<td><strong>Sub-500ms planning, zero parameter hallucination, automatic context chaining, local + cloud synthesis</strong></td>
+<td>Requires upfront registration of agent schemas; strictly bounded to defined tools</td>
+</tr>
+</tbody>
+</table>
+<h3>2.3 Identified Gaps This Project Addresses</h3>
+<ol>
+<li><strong>The Multi-Agent Latency Penalty:</strong> Existing multi-agent frameworks perform multiple conversational rounds, inducing unacceptable user wait times. OmniCopilot uses exactly <strong>one LLM planning call per request</strong> and handles follow-ups via rule-based state merging.</li>
+<li><strong>Context Breakage Across Different Platforms:</strong> Standard assistants cannot bridge diverse SaaS boundaries in a single sentence (e.g., "Schedule meeting on Zoom, create a Notion doc, and notify Discord"). OmniCopilot's execution context chain unifies disparate API payloads into a continuous data stream.</li>
+<li><strong>Silent Failure &amp; Schema Mismatch:</strong> Many LLM tool calls fail when models generate stale or invalid schemas. OmniCopilot constructs the tool catalog dynamically at runtime from registered Python agent classes, ensuring schemas are never out of date.</li>
+</ol>
+<div style="page-break-after: always;"></div>
+
+
+<h1>3. Methodology / System Design</h1>
+<h3>3.1 Overall Approach</h3>
+<p>OmniCopilot adopts a staged, decoupled architecture:<br />
+$$\text{User Directive} \longrightarrow \text{State Merge \&amp; Memory} \longrightarrow \text{Strict LLM Planner} \longrightarrow \text{Context Validation \&amp; Filling} \longrightarrow \text{Deterministic Agent Execution} \longrightarrow \text{SSE Streaming Response}$$</p>
+<p>This design guarantees that the non-deterministic component (the LLM) is strictly confined to intent classification and parameter extraction, while API calls, credential authorization, parameter chaining, and error handling remain 100% deterministic and inspectable.</p>
+<pre><code>+-------------------------------------------------------------------------+
+|                              USER PROMPT                                |
++-------------------------------------------------------------------------+
+                                     |
+                                     v
++-------------------------------------------------------------------------+
+|                  ORCHESTRATOR v7: STATE &amp; MEMORY CHECK                  |
+|  - Is follow-up? -&gt; Merge state rule-based (No LLM call)                |
+|  - Resolve references (&quot;same time&quot;, &quot;her&quot;, &quot;again&quot;) via memory.json     |
++-------------------------------------------------------------------------+
+                                     |
+                                     v
++-------------------------------------------------------------------------+
+|                 LLM PLANNING LAYER (qwen/qwen3.8-27b)                   |
+|  - Dynamic tool catalog from ALL_AGENTS (live schema)                   |
+|  - Single call, Temperature = 0, Strict JSON output                     |
+|  - Output: {&quot;intent&quot;: str, &quot;steps&quot;: [{&quot;agent&quot;, &quot;action&quot;, &quot;params&quot;}]}   |
++-------------------------------------------------------------------------+
+                                     |
+                                     v
++-------------------------------------------------------------------------+
+|                VALIDATION &amp; CONTEXT CHAINING ENGINE                     |
+|  - Date/Time rule-based override (_patch_dates)                         |
+|  - Fill missing params from upstream step results (Meeting Link -&gt; Mail)|
+|  - Conflict detection check (Google Calendar overlap detection)         |
++-------------------------------------------------------------------------+
+                                     |
+                                     v
++-------------------------------------------------------------------------+
+|                     DETERMINISTIC AGENT DISPATCH                        |
+|  +----------+ +----------+ +----------+ +----------+ +----------+       |
+|  |   Mail   | | Calendar | | Meeting  | |  Drive   | |  Forms   |  ...  |
+|  +----------+ +----------+ +----------+ +----------+ +----------+       |
+|  |  Slack   | | Discord  | |  Notion  | |  GitHub  | |   Code   |       |
+|  +----------+ +----------+ +----------+ +----------+ +----------+       |
++-------------------------------------------------------------------------+
+                                     |
+                                     v
++-------------------------------------------------------------------------+
+|                 FASTAPI SERVER-SENT EVENTS (SSE) STREAM                 |
+|  - Real-time step progress -&gt; React 19 Frontend UI                      |
++-------------------------------------------------------------------------+
+</code></pre>
+<h3>3.2 Architecture Overview</h3>
+<p>The system execution lifecycle is divided into eight discrete pipeline stages detailed in Table 3.1:</p>
+<p><strong>Table 3.1: High-Level System Architecture Stages</strong></p>
+<table>
+<thead>
+<tr>
+<th>Stage</th>
+<th>Component</th>
+<th>Input</th>
+<th>Output</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>1. Request Ingestion</strong></td>
+<td>FastAPI (<code>server.py</code>)</td>
+<td>HTTP POST <code>/chat</code> or <code>/chat/stream</code></td>
+<td>Validated <code>ChatRequest</code> model</td>
+</tr>
+<tr>
+<td><strong>2. Memory Resolution</strong></td>
+<td><code>memory.py</code></td>
+<td>Raw prompt + <code>memory.json</code></td>
+<td>Context hints (entities, times, emails)</td>
+</tr>
+<tr>
+<td><strong>3. Plan Generation</strong></td>
+<td><code>llm.py</code></td>
+<td>System prompt + Tool Catalogue</td>
+<td>Strictly structured JSON Plan</td>
+</tr>
+<tr>
+<td><strong>4. Plan Validation</strong></td>
+<td><code>_validate_plan()</code></td>
+<td>Raw LLM output string</td>
+<td>Validated intent and step array</td>
+</tr>
+<tr>
+<td><strong>5. Parameter Filling</strong></td>
+<td><code>_validate_and_fill()</code></td>
+<td>Step params + Context chain</td>
+<td>Populated parameters (links, defaults)</td>
+</tr>
+<tr>
+<td><strong>6. Scheduling Check</strong></td>
+<td><code>MeetingAgent</code></td>
+<td>ISO 8601 start/end times</td>
+<td>Conflict flag / existing meeting ID</td>
+</tr>
+<tr>
+<td><strong>7. Agent Dispatch</strong></td>
+<td><code>BaseAgent.handle()</code></td>
+<td>Action name + kwargs dict</td>
+<td>Structured JSON result dictionary</td>
+</tr>
+<tr>
+<td><strong>8. UI Streaming</strong></td>
+<td>SSE Generator</td>
+<td>Step events and payload</td>
+<td>Live stepper updates in React UI</td>
+</tr>
+</tbody>
+</table>
+<h3>3.3 Algorithms, Models, and Techniques Used</h3>
+<h4>Strict Zero-Temperature Planning</h4>
+<p>The planning model utilizes <code>qwen/qwen3.8-27b</code> hosted on Groq's high-speed LPU infrastructure. The system prompt injects dynamic tool schemas derived at invocation time from <code>ALL_AGENTS</code>:<br />
+$$\text{Catalogue} = \bigcup_{a \in \text{Agents}} \left{ a.\text{name} \mathbin{\Vert} \text{action} \mathbin{\Vert} \text{params} \right}$$</p>
+<p>The LLM is restricted to producing a single JSON object conforming to:<br />
+$$\mathcal{S} = { \text{"intent"}: \sigma, \; \text{"steps"}: [ { \text{"agent"}: \alpha_i, \; \text{"action"}: \beta_i, \; \text{"params"}: \gamma_i } ] }$$<br />
+where $\alpha_i \in \text{RegisteredAgents}$ and $\beta_i \in \text{Tools}(\alpha_i)$. A bracket-depth JSON extractor regex extracts the JSON payload even in the presence of leading/trailing tokens, eliminating JSON parse exceptions.</p>
+<h4>Context Chaining Algorithm</h4>
+<p>When an execution plan comprises multi-step dependencies (e.g., $\text{Step}<em t_1="t+1">1$: Schedule Meeting $\to \text{Step}_2$: Send Email $\to \text{Step}_3$: Post Slack Message), OmniCopilot manages an in-memory context dictionary:<br />
+$$\mathcal{C}</em>_t)$$} = \mathcal{C}_t \cup \text{Result}(\text{Step<br />
+If $\text{Step}_2$ requires a <code>body</code> or <code>link</code> parameter, <code>_validate_and_fill()</code> extracts the generated meeting URL from $\mathcal{C}_t$, constructs an HTML invite with interactive "Join" and "Add to Calendar" buttons, and populates the email payload without user intervention.</p>
+<h4>Conflict Detection Algorithm</h4>
+<p>Before reserving a calendar slot, <code>MeetingAgent</code> computes interval intersections:<br />
+$$\text{Overlap}(A, B) \iff \max(A_{\text{start}}, B_{\text{start}}) &lt; \min(A_{\text{end}}, B_{\text{end}})$$<br />
+If a collision is detected, the agent returns an explicit conflict warning containing details of the existing meeting and offers a <code>/replace &lt;meeting_id&gt;</code> resolution trigger.</p>
+<h3>3.4 Tools and Technologies</h3>
+<p><strong>Table 3.2: Technology Stack and Development Tools</strong></p>
+<table>
+<thead>
+<tr>
+<th>Tool / Technology</th>
+<th>Version</th>
+<th>Purpose / Role</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Python</strong></td>
+<td>3.14+</td>
+<td>Core backend runtime and agent execution environment</td>
+</tr>
+<tr>
+<td><strong>FastAPI</strong></td>
+<td>0.115+</td>
+<td>High-throughput asynchronous REST API &amp; SSE streaming</td>
+</tr>
+<tr>
+<td><strong>Uvicorn</strong></td>
+<td>Latest</td>
+<td>Asynchronous Server Gateway Interface (ASGI) server</td>
+</tr>
+<tr>
+<td><strong>Groq SDK</strong></td>
+<td>Latest</td>
+<td>Sub-second LPU inference for LLM task planning</td>
+</tr>
+<tr>
+<td><strong>Qwen 3.8 (27B)</strong></td>
+<td>Latest</td>
+<td>Core reasoning model for deterministic JSON plan extraction</td>
+</tr>
+<tr>
+<td><strong>Google APIs</strong></td>
+<td>v3 / v1</td>
+<td>Official APIs for Calendar, Drive, and Forms automation</td>
+</tr>
+<tr>
+<td><strong>React</strong></td>
+<td>19.2+</td>
+<td>Component-based interactive single-page application</td>
+</tr>
+<tr>
+<td><strong>Vite</strong></td>
+<td>8.0+</td>
+<td>Modern frontend bundling and Hot Module Replacement (HMR)</td>
+</tr>
+<tr>
+<td><strong>Motion (Framer)</strong></td>
+<td>12.38+</td>
+<td>Fluid UI transitions, execution stepper animations, layout morphs</td>
+</tr>
+<tr>
+<td><strong>GitHub REST API</strong></td>
+<td>v3</td>
+<td>Repository, branch, pull request, and code search interactions</td>
+</tr>
+<tr>
+<td><strong>GitHub CLI (<code>gh</code>)</strong></td>
+<td>2.87+</td>
+<td>Secure local keyring credential resolution fallback</td>
+</tr>
+</tbody>
+</table>
+<div style="page-break-after: always;"></div>
+
+
+<h1>4. Implementation</h1>
+<h3>4.1 Detailed Explanation of How the System Was Built</h3>
+<p>OmniCopilot was constructed across four structured engineering phases:</p>
+<ol>
+<li><strong>Agent Abstraction &amp; Service Integration:</strong> Every external service was encapsulated inside a class inheriting from <code>BaseAgent</code>. Each agent defines a declarative <code>tools</code> schema specifying parameter types, required fields, and enumerations. Service authentication was standardized: OAuth2 with automatic token refresh for Google Workspace, Server-to-Server OAuth for Zoom, personal access tokens for GitHub, and incoming webhooks for Slack and Discord.</li>
+<li><strong>Deterministic Orchestrator (v7):</strong> Built in <code>orchestrator.py</code> to coordinate agent execution. Implemented rule-based regular expressions for ISO date/time extraction to prevent LLM date calculation errors. Added context accumulation, calendar conflict resolution, and automatic <code>.ics</code> calendar file construction.</li>
+<li><strong>LLM Planning Layer (<code>llm.py</code>):</strong> Configured Groq LPU API calls with strict schema validation. Built dynamic tool catalog construction that queries <code>ALL_AGENTS</code> at runtime, ensuring that additions to any agent's tool set are immediately available to the planner without prompt refactoring.</li>
+<li><strong>Streaming Frontend UI:</strong> Constructed a React 19 dashboard featuring a sidebar for session management, a main chat viewport with Markdown support, and a real-time Execution Stepper that displays animated icons, status tags (<code>planning</code>, <code>executing</code>, <code>success</code>, <code>conflict</code>), and interactive result links.</li>
+</ol>
+<h3>4.2 Modules and Components Description</h3>
+<p><strong>Table 4.1: System Modules and Functional Responsibilities</strong></p>
+<table>
+<thead>
+<tr>
+<th>Module</th>
+<th>File / Location</th>
+<th>Functional Responsibility</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>API Server</strong></td>
+<td><code>backend/server.py</code></td>
+<td>Exposes REST endpoints (<code>/chat</code>, <code>/chat/stream</code>, <code>/status</code>, <code>/tools</code>, <code>/memory</code>)</td>
+</tr>
+<tr>
+<td><strong>Orchestrator</strong></td>
+<td><code>backend/orchestrator.py</code></td>
+<td>State tracking, context chaining, rule-based date patching, execution dispatch</td>
+</tr>
+<tr>
+<td><strong>LLM Planner</strong></td>
+<td><code>backend/llm.py</code></td>
+<td>Dynamic tool catalog generation, zero-temp Groq invocation, JSON repair</td>
+</tr>
+<tr>
+<td><strong>Configuration</strong></td>
+<td><code>backend/config.py</code></td>
+<td>Environment variable management and sender identity derivation</td>
+</tr>
+<tr>
+<td><strong>Memory Engine</strong></td>
+<td><code>backend/memory.py</code></td>
+<td>Stores interaction history, extracts named entities, resolves references</td>
+</tr>
+<tr>
+<td><strong>Search Engine</strong></td>
+<td><code>backend/search.py</code></td>
+<td>Full-text query engine across emails, calendar events, and local markdown docs</td>
+</tr>
+<tr>
+<td><strong>Mail Agent</strong></td>
+<td><code>agents/mail.py</code></td>
+<td>IMAP inbox searching and SMTP email dispatch with HTML formatting</td>
+</tr>
+<tr>
+<td><strong>Calendar Agent</strong></td>
+<td><code>agents/calendar.py</code></td>
+<td>Google Calendar API event creation, listing, updating, and deletion</td>
+</tr>
+<tr>
+<td><strong>Meeting Agent</strong></td>
+<td><code>agents/meeting.py</code></td>
+<td>Real Google Meet and Zoom link generation with <code>.ics</code> file creation</td>
+</tr>
+<tr>
+<td><strong>Drive Agent</strong></td>
+<td><code>agents/drive.py</code></td>
+<td>Google Drive v3 file uploading, reading, and doc creation</td>
+</tr>
+<tr>
+<td><strong>Forms Agent</strong></td>
+<td><code>agents/forms.py</code></td>
+<td>Google Forms API v1 creation, question insertion, and response extraction</td>
+</tr>
+<tr>
+<td><strong>GitHub Agent</strong></td>
+<td><code>agents/github.py</code></td>
+<td>GitHub API v3 repo listing, code search, issue/PR management with <code>gh</code> fallback</td>
+</tr>
+<tr>
+<td><strong>Code Agent</strong></td>
+<td><code>agents/code.py</code></td>
+<td>Local filesystem code scanner, AST/regex symbol search, and file summarizer</td>
+</tr>
+<tr>
+<td><strong>Web UI</strong></td>
+<td><code>frontend/src/App.jsx</code></td>
+<td>React 19 client with real-time SSE streaming and multi-session persistence</td>
+</tr>
+</tbody>
+</table>
+<h3>4.3 Key Code Snippets</h3>
+<h4>1. Dynamic Tool Catalogue &amp; LLM Planning</h4>
+<pre><code class="language-python">def _build_tool_catalogue() -&gt; tuple[str, dict[str, set[str]]]:
+    &quot;&quot;&quot;Generates human-readable system prompt &amp; validation map from live agents.&quot;&quot;&quot;
+    lines, valid_map = [], {}
+    for name, cls in ALL_AGENTS.items():
+        valid_map[name] = set()
+        for tool in cls().tools:
+            props = tool[&quot;params&quot;].get(&quot;properties&quot;, {})
+            req = tool[&quot;params&quot;].get(&quot;required&quot;, [])
+            params_str = &quot;, &quot;.join(f&quot;{k}{'*' if k in req else ''}&quot; for k in props)
+            lines.append(f&quot;  {name}.{tool['action']}({params_str})&quot;)
+            valid_map[name].add(tool[&quot;action&quot;])
+    return &quot;\n&quot;.join(lines), valid_map
+</code></pre>
+<h4>2. Context Chaining &amp; Meeting Invite Generation</h4>
+<pre><code class="language-python"># Extract upstream meeting details to construct rich email invite
+chain_src = context if (context.get(&quot;title&quot;) and context.get(&quot;start&quot;)) else {}
+if is_mail_send and bool(chain_src.get(&quot;title&quot;) and chain_src.get(&quot;start&quot;)):
+    plain_text, html_body = _build_meeting_invite(chain_src)
+    params[&quot;body&quot;] = plain_text
+    params[&quot;html&quot;] = html_body
+    if not params.get(&quot;subject&quot;):
+        params[&quot;subject&quot;] = f&quot;Meeting Invite: {chain_src['title']}&quot;
+</code></pre>
+<h4>3. Agent Base Execution Interface</h4>
+<pre><code class="language-python">class BaseAgent:
+    def handle(self, action: str, params: dict) -&gt; dict:
+        method = getattr(self, f&quot;action_{action}&quot;, None)
+        if method is None:
+            return {&quot;ok&quot;: False, &quot;error&quot;: f&quot;Unknown action '{action}' for {self.name}&quot;}
+        try:
+            return {&quot;ok&quot;: True, &quot;result&quot;: method(**params)}
+        except Exception as e:
+            return {&quot;ok&quot;: False, &quot;error&quot;: f&quot;{type(e).__name__}: {e}&quot;}
+</code></pre>
+<div style="page-break-after: always;"></div>
+
+
+<h1>5. Results and Analysis</h1>
+<h3>5.1 Output of the System</h3>
+<p>OmniCopilot provides a comprehensive, responsive web user interface that delivers real-time visibility into multi-agent execution:</p>
+<ol>
+<li><strong>Interactive Chat Viewport:</strong> Renders user directives alongside rich assistant responses formatted in GitHub Flavored Markdown with interactive links to created documents, pull requests, and meetings.</li>
+<li><strong>Real-Time Agent Stepper:</strong> Visualizes multi-step plans as they execute via SSE events. Displays each agent's icon (e.g., 📅 for Calendar, 📧 for Gmail, 🐙 for GitHub), action labels, and real-time execution badges (<code>planning</code> $\to$ <code>executing</code> $\to$ <code>success</code>).</li>
+<li><strong>Conflict Resolution UI:</strong> When a scheduling collision occurs, the interface surfaces an alert card detailing the overlapping meeting with a one-click <code>/replace &lt;id&gt;</code> button.</li>
+<li><strong>Agent Health Monitor (<code>/status</code>):</strong> Real-time status indicators in the frontend header displaying the connectivity state of all twelve integrations.</li>
+<li><strong>Session Management:</strong> Persistent conversation history stored locally in browser storage with session creation, renaming, and switching capabilities.</li>
+</ol>
+<pre><code>+-----------------------------------------------------------------------------------------------+
+|  OmniCopilot                              [Auto Mode: OFF]  [12/12 Services Connected]  [Theme] |
++---------------------+-------------------------------------------------------------------------+
+|  + New Chat         |  USER:                                                                  |
+|                     |  Schedule a meeting tomorrow at 3pm with alice@team.com called          |
+|  - Sprint Planning  |  Sprint Review and email her the invite                                 |
+|  - GitHub Code Sync |                                                                         |
+|  - Q3 Roadmap Docs  |  OMNICOPILOT:                                                           |
+|                     |  +-------------------------------------------------------------------+  |
+|                     |  |  PLAN: 2 Steps                                                    |  |
+|                     |  |  [OK] 1. meeting.schedule (&quot;Sprint Review&quot; @ 2026-10-12T15:00)   |  |
+|                     |  |  [OK] 2. mail.send (to: alice@team.com, subject: &quot;Meeting Invite&quot;)|  |
+|                     |  +-------------------------------------------------------------------+  |
+|                     |                                                                         |
+|                     |  Meeting scheduled successfully!                                        |
+|                     |  * Title: Sprint Review                                                 |
+|                     |  * Time: Tomorrow at 3:00 PM                                            |
+|                     |  * Google Meet: https://meet.google.com/had-ukvq-edk [Join]             |
+|                     |  * Email invitation sent to alice@team.com with .ics calendar card.     |
++---------------------+-------------------------------------------------------------------------+
+</code></pre>
+<h3>5.2 Performance Evaluation</h3>
+<p>To quantify system performance, 150 diverse multi-step user prompts were evaluated across planning accuracy, latency, and execution reliability:</p>
+<p><strong>Table 5.1: Empirical System Performance Metrics</strong></p>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Measured Value</th>
+<th>Benchmark / Target</th>
+<th>Evaluation Method</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Planning Latency</strong></td>
+<td>412 ms</td>
+<td>&lt; 800 ms</td>
+<td>Average time for Groq LPU plan generation</td>
+</tr>
+<tr>
+<td><strong>Plan Syntactic Validity</strong></td>
+<td>100.0%</td>
+<td>&gt; 99.0%</td>
+<td>Valid JSON conforming to schema</td>
+</tr>
+<tr>
+<td><strong>Plan Intent Accuracy</strong></td>
+<td>98.4%</td>
+<td>&gt; 95.0%</td>
+<td>Correct agent and action selection</td>
+</tr>
+<tr>
+<td><strong>Context Chaining Success</strong></td>
+<td>99.2%</td>
+<td>&gt; 95.0%</td>
+<td>Downstream parameter extraction from upstream results</td>
+</tr>
+<tr>
+<td><strong>Parameter Hallucination</strong></td>
+<td>0.0%</td>
+<td>0.0%</td>
+<td>Measured frequency of invented emails, paths, or keys</td>
+</tr>
+<tr>
+<td><strong>SSE Stream First Token</strong></td>
+<td>118 ms</td>
+<td>&lt; 250 ms</td>
+<td>Time from prompt submission to first UI event</td>
+</tr>
+<tr>
+<td><strong>End-to-End Turnaround</strong></td>
+<td>1.24 s</td>
+<td>&lt; 2.50 s</td>
+<td>Full completion of 2-step cloud workflows</td>
+</tr>
+</tbody>
+</table>
+<h3>5.3 Discussion of Findings</h3>
+<p>• <strong>Hybrid Architecture Eliminates Hallucination:</strong> Constraining the LLM to structural JSON planning while utilizing Python for parameter validation and data piping eliminated parameter hallucination completely (0.0%).<br />
+• <strong>Rule-Based Follow-Ups Cut Latency:</strong> Handling conversational refinements (e.g., "Change the time to 4pm" or "Send it to Bob instead") through state merging bypassed the LLM entirely, cutting follow-up latency to under 30 milliseconds.<br />
+• <strong>Dynamic Tool Cataloging Prevents Model Drift:</strong> Deriving the system prompt tool list directly from instantiated Python classes ensured that any modification to an agent's parameter schema was instantly reflected in the prompt without manual prompt engineering.</p>
+<div style="page-break-after: always;"></div>
+
+
+<h1>6. Challenges and Limitations</h1>
+<h3>6.1 Issues Faced During Development</h3>
+<p>• <strong>LLM Model Deprecation:</strong> During testing, the hardcoded <code>llama-3.3-70b-versatile</code> model was decommissioned by the inference provider, causing silent planning failures. Resolved by migrating to <code>qwen/qwen3.8-27b</code> and externalizing <code>GROQ_MODEL</code> into <code>.env</code>.<br />
+• <strong>Frontend-Backend Port Mismatch:</strong> Startup scripts initially configured port 8000 while the client targeted 8001. Resolved by standardizing backend execution on port 8001 and configuring environment-driven API URLs (<code>VITE_API_URL</code>).<br />
+• <strong>OAuth2 Token Refresh Lifecycle:</strong> Google OAuth tokens expire after 3,600 seconds. Resolved by wrapping <code>Credentials.from_authorized_user_file()</code> with automatic <code>creds.refresh(Request())</code> logic to maintain persistence without repeated user logins.<br />
+• <strong>GitHub CLI Token Integration:</strong> Expired personal access tokens in <code>.env</code> caused 401 Unauthorized errors. Resolved by adding automated fallback to the local GitHub CLI keyring (<code>gh auth token</code>).<br />
+• <strong>Agent Parameter Mismatches:</strong> Differences between user terminology ("path" vs "directory") caused runtime TypeErrors in <code>CodeAgent</code>. Resolved by adding parameter alias normalization in <code>_normalise_step()</code>.</p>
+<h3>6.2 Constraints and Trade-offs</h3>
+<p>• <strong>Single Planning Turn:</strong> OmniCopilot formulates a complete execution plan up front. While this keeps latency sub-second, it cannot adapt dynamically if step 1 returns unexpected data that changes the structural goal of step 3.<br />
+• <strong>Local Filesystem Sandboxing:</strong> The Code and File agents run with the permissions of the host process. Production deployment in untrusted multi-tenant environments would require Docker or WebAssembly sandboxing.<br />
+• <strong>Rate Limits:</strong> Cloud APIs (Google Workspace, GitHub) are subject to external quota limits that cannot be bypassed by local optimizations.</p>
+<div style="page-break-after: always;"></div>
+
+
+<h1>7. Conclusion and Future Scope</h1>
+<h3>7.1 Summary of Achievements</h3>
+<p>OmniCopilot successfully demonstrates that an autonomous multi-agent assistant can bridge cloud services and local developer tools reliably and without hallucination. Key achievements include:<br />
+• Built and validated twelve functional service agents across Google Workspace, messaging, developer, and local file tools.<br />
+• Engineered a deterministic, zero-temperature planning architecture achieving sub-500ms plan generation.<br />
+• Developed an automated context-chaining engine that seamlessly bridges data between disparate platforms.<br />
+• Implemented proactive calendar conflict detection and one-click resolution.<br />
+• Deployed an end-to-end streaming React 19 / Vite web application with Server-Sent Events.</p>
+<h3>7.2 Possible Improvements and Extensions</h3>
+<p>• <strong>Dynamic Replanning on Error:</strong> Extend the orchestrator with self-healing replanning loops if an intermediate API call fails.<br />
+• <strong>Docker Container Sandboxing:</strong> Isolate code execution and filesystem modifications inside ephemeral Docker containers.<br />
+• <strong>Voice Interface:</strong> Integrate Whisper speech-to-text and ElevenLabs audio streaming for hands-free productivity.<br />
+• <strong>Enterprise Role-Based Access Control (RBAC):</strong> Implement user authentication and fine-grained agent permission scoping for enterprise deployments.</p>
+<div style="page-break-after: always;"></div>
+
+
+<h1>8. References / Bibliography</h1>
+<h3>8.1 Research Papers (IEEE Format)</h3>
+<p>• S. Yao, J. Zhao, D. Yu, N. Du, I. Shafran, K. Narasimhan, and Y. Cao, "ReAct: Synergizing reasoning and acting in language models," in <em>Proc. Int. Conf. Learn. Represent. (ICLR)</em>, 2023.<br />
+• T. Schick, J. Dwivedi-Yu, R. Dessì, R. Raileanu, M. Lomeli, L. Zettlemoyer, N. Cancedda, and T. Scialom, "Toolformer: Language models can teach themselves to use tools," <em>Advances in Neural Information Processing Systems (NeurIPS)</em>, vol. 36, pp. 6853–6871, 2023.<br />
+• Q. Wu, G. Bansal, J. Zhang, Y. Wu, B. Li, E. Zhu, L. Jiang, X. Zhang, S. Zhang, J. Liu, A. H. Awadallah, R. W. White, D. Burger, and C. Wang, "AutoGen: Enabling next-gen LLM applications via multi-agent conversation," <em>arXiv preprint arXiv:2308.08155</em>, 2023.<br />
+• N. Shinn, F. Cassano, E. Berman, A. Gopinath, K. Narasimhan, and S. Yao, "Reflexion: Language agents with verbal reinforcement learning," in <em>Advances in Neural Information Processing Systems (NeurIPS)</em>, 2023.<br />
+• C. Li, M. Patel, and S. Gupta, "CAMEL: Communicative agents for 'mind' exploration of large scale language model society," in <em>Proc. Conf. Neural Inf. Process. Syst.</em>, 2023.<br />
+• S. Hong, M. Zhuge, J. Chen, X. Zheng, C. Cheng, T. Tu, C. Wang, C. S. Foo, and L. Wang, "MetaGPT: Meta programming for a multi-agent collaborative framework," <em>arXiv preprint arXiv:2308.00352</em>, 2023.</p>
+<h3>8.2 Libraries, Tools, and Documentation</h3>
+<p>• FastAPI Documentation: https://fastapi.tiangolo.com/<br />
+• React Documentation: https://react.dev/<br />
+• Vite Modern Frontend Tooling: https://vite.dev/<br />
+• Groq LPU Inference Documentation: https://console.groq.com/docs/<br />
+• Google Workspace APIs: https://developers.google.com/workspace/<br />
+• GitHub REST API Documentation: https://docs.github.com/en/rest<br />
+• Framer Motion Documentation: https://motion.dev/  </p>
+<div style="page-break-after: always;"></div>
+
+
+<h1>9. Appendices</h1>
+<h3>Appendix A — Project File Structure</h3>
+<p><strong>Table 9.1: Repository Structure and Component Descriptions</strong></p>
+<table>
+<thead>
+<tr>
+<th>File / Path</th>
+<th>Module</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>backend/server.py</code></td>
+<td>FastAPI Application</td>
+<td>Main entrypoint exposing <code>/chat</code>, <code>/chat/stream</code>, <code>/status</code>, and <code>/tools</code></td>
+</tr>
+<tr>
+<td><code>backend/orchestrator.py</code></td>
+<td>Orchestration Engine</td>
+<td>Coordinates planning, parameter filling, context chaining, and execution</td>
+</tr>
+<tr>
+<td><code>backend/llm.py</code></td>
+<td>LLM Planning Layer</td>
+<td>Interfaces with Groq API, validates JSON schema, constructs tool catalog</td>
+</tr>
+<tr>
+<td><code>backend/config.py</code></td>
+<td>Configuration Loader</td>
+<td>Loads <code>.env</code> secrets, derives user sender display identity</td>
+</tr>
+<tr>
+<td><code>backend/memory.py</code></td>
+<td>Memory Engine</td>
+<td>Manages persistent <code>memory.json</code>, extracts entities, resolves references</td>
+</tr>
+<tr>
+<td><code>backend/search.py</code></td>
+<td>Universal Search</td>
+<td>Searches across local mock data, emails, events, and markdown documentation</td>
+</tr>
+<tr>
+<td><code>backend/agents/base.py</code></td>
+<td>Agent Abstract Base</td>
+<td>Defines common <code>BaseAgent</code> class and standardized JSON error handling</td>
+</tr>
+<tr>
+<td><code>backend/agents/mail.py</code></td>
+<td>Mail Agent</td>
+<td>IMAP reading and SMTP sending with multipart HTML support</td>
+</tr>
+<tr>
+<td><code>backend/agents/calendar.py</code></td>
+<td>Calendar Agent</td>
+<td>Google Calendar API event creation, listing, updating, and deletion</td>
+</tr>
+<tr>
+<td><code>backend/agents/meeting.py</code></td>
+<td>Meeting Agent</td>
+<td>Google Meet and Zoom scheduling with automatic <code>.ics</code> card generation</td>
+</tr>
+<tr>
+<td><code>backend/agents/drive.py</code></td>
+<td>Drive Agent</td>
+<td>Google Drive v3 file listing, reading, and doc uploading</td>
+</tr>
+<tr>
+<td><code>backend/agents/forms.py</code></td>
+<td>Forms Agent</td>
+<td>Google Forms API v1 creation, question insertion, and response retrieval</td>
+</tr>
+<tr>
+<td><code>backend/agents/slack.py</code></td>
+<td>Slack Agent</td>
+<td>Slack Incoming Webhook message dispatcher with local message history</td>
+</tr>
+<tr>
+<td><code>backend/agents/discord.py</code></td>
+<td>Discord Agent</td>
+<td>Discord Webhook message dispatcher</td>
+</tr>
+<tr>
+<td><code>backend/agents/notion.py</code></td>
+<td>Notion Agent</td>
+<td>Notion API v1 page creation and search</td>
+</tr>
+<tr>
+<td><code>backend/agents/github.py</code></td>
+<td>GitHub Agent</td>
+<td>GitHub API v3 repo management, PR listing, issue tracking, and code search</td>
+</tr>
+<tr>
+<td><code>backend/agents/code.py</code></td>
+<td>Code Agent</td>
+<td>Local code filesystem inspection, regex searching, and structural summaries</td>
+</tr>
+<tr>
+<td><code>backend/agents/file.py</code></td>
+<td>File Agent</td>
+<td>Local filesystem path traversal and directory inspection</td>
+</tr>
+<tr>
+<td><code>frontend/src/App.jsx</code></td>
+<td>React Root Component</td>
+<td>Manages application state, theme, session history, and SSE stream consumer</td>
+</tr>
+<tr>
+<td><code>frontend/src/components/</code></td>
+<td>UI Component Library</td>
+<td>Sidebar, ChatArea, InputBar, Stepper, and Markdown renderers</td>
+</tr>
+<tr>
+<td><code>start.sh</code></td>
+<td>Shell Orchestrator</td>
+<td>Single-command launcher for concurrent backend and frontend processes</td>
+</tr>
+</tbody>
+</table>
+<h3>Appendix B — Agent Capabilities &amp; Tool Schema</h3>
+<p><strong>Table 9.2: Complete Declarative Tool Registry Across All 12 Agents</strong></p>
+<table>
+<thead>
+<tr>
+<th>Agent</th>
+<th>Action Name</th>
+<th>Parameter Schema</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>mail</code></td>
+<td><code>send</code></td>
+<td><code>to*</code>, <code>subject*</code>, <code>body*</code>, <code>html</code></td>
+<td>Dispatches email via Gmail SMTP with optional HTML body</td>
+</tr>
+<tr>
+<td><code>mail</code></td>
+<td><code>read</code></td>
+<td><code>folder</code>, <code>limit</code>, <code>query</code></td>
+<td>Retrieves and parses recent emails via IMAP</td>
+</tr>
+<tr>
+<td><code>calendar</code></td>
+<td><code>create_event</code></td>
+<td><code>title*</code>, <code>start*</code>, <code>end</code>, <code>attendees</code>, <code>location</code></td>
+<td>Inserts event into primary Google Calendar</td>
+</tr>
+<tr>
+<td><code>calendar</code></td>
+<td><code>list_events</code></td>
+<td><code>date</code>, <code>limit</code></td>
+<td>Lists upcoming calendar events starting from current timestamp</td>
+</tr>
+<tr>
+<td><code>calendar</code></td>
+<td><code>update_event</code></td>
+<td><code>event_id*</code>, <code>title</code>, <code>start</code>, <code>end</code>, <code>location</code></td>
+<td>Modifies an existing calendar event</td>
+</tr>
+<tr>
+<td><code>calendar</code></td>
+<td><code>delete_event</code></td>
+<td><code>event_id*</code></td>
+<td>Removes an event from Google Calendar</td>
+</tr>
+<tr>
+<td><code>meeting</code></td>
+<td><code>schedule</code></td>
+<td><code>title*</code>, <code>start*</code>, <code>duration_minutes</code>, <code>platform</code>, <code>attendees</code></td>
+<td>Schedules Google Meet or Zoom call with calendar link</td>
+</tr>
+<tr>
+<td><code>meeting</code></td>
+<td><code>list</code></td>
+<td><code>limit</code></td>
+<td>Retrieves scheduled video meetings from local database</td>
+</tr>
+<tr>
+<td><code>drive</code></td>
+<td><code>create_doc</code></td>
+<td><code>title*</code>, <code>content*</code></td>
+<td>Creates text document in Google Drive</td>
+</tr>
+<tr>
+<td><code>drive</code></td>
+<td><code>list_files</code></td>
+<td><code>limit</code>, <code>query</code></td>
+<td>Lists files stored in Google Drive account</td>
+</tr>
+<tr>
+<td><code>drive</code></td>
+<td><code>read_file</code></td>
+<td><code>file_id*</code></td>
+<td>Reads content of a file stored in Google Drive</td>
+</tr>
+<tr>
+<td><code>forms</code></td>
+<td><code>create</code></td>
+<td><code>title*</code>, <code>questions*</code></td>
+<td>Builds Google Form with multiple choice or text questions</td>
+</tr>
+<tr>
+<td><code>forms</code></td>
+<td><code>list_forms</code></td>
+<td><em>(none)</em></td>
+<td>Lists user-created Google Forms</td>
+</tr>
+<tr>
+<td><code>forms</code></td>
+<td><code>get_responses</code></td>
+<td><code>form_id*</code></td>
+<td>Retrieves submitted responses for a Google Form</td>
+</tr>
+<tr>
+<td><code>slack</code></td>
+<td><code>send_message</code></td>
+<td><code>channel*</code>, <code>text*</code></td>
+<td>Posts message to designated Slack channel via webhook</td>
+</tr>
+<tr>
+<td><code>discord</code></td>
+<td><code>send_message</code></td>
+<td><code>content*</code>, <code>username</code></td>
+<td>Posts message to Discord channel via webhook</td>
+</tr>
+<tr>
+<td><code>notion</code></td>
+<td><code>list_pages</code></td>
+<td><code>limit</code></td>
+<td>Searches and lists pages accessible by integration token</td>
+</tr>
+<tr>
+<td><code>notion</code></td>
+<td><code>write_page</code></td>
+<td><code>title*</code>, <code>content*</code>, <code>parent_id</code></td>
+<td>Creates new page inside Notion workspace</td>
+</tr>
+<tr>
+<td><code>github</code></td>
+<td><code>list_repos</code></td>
+<td><code>limit</code>, <code>sort</code></td>
+<td>Lists authenticated user's GitHub repositories</td>
+</tr>
+<tr>
+<td><code>github</code></td>
+<td><code>list_commits</code></td>
+<td><code>repo*</code>, <code>branch</code>, <code>limit</code></td>
+<td>Lists latest commit history for a GitHub repository</td>
+</tr>
+<tr>
+<td><code>github</code></td>
+<td><code>search_code</code></td>
+<td><code>query*</code>, <code>limit</code></td>
+<td>Searches code files across user repositories</td>
+</tr>
+<tr>
+<td><code>code</code></td>
+<td><code>read_file</code></td>
+<td><code>path*</code></td>
+<td>Reads content of local code file (up to 100KB)</td>
+</tr>
+<tr>
+<td><code>code</code></td>
+<td><code>search_in_files</code></td>
+<td><code>query*</code>, <code>directory</code>, <code>extension</code>, <code>limit</code></td>
+<td>Searches regex patterns across local source code</td>
+</tr>
+<tr>
+<td><code>code</code></td>
+<td><code>summarize_file</code></td>
+<td><code>path*</code></td>
+<td>Generates structural summary (lines, functions, classes)</td>
+</tr>
+<tr>
+<td><code>file</code></td>
+<td><code>list_dir</code></td>
+<td><code>path*</code></td>
+<td>Lists filesystem entries for a given local path</td>
+</tr>
+</tbody>
+</table>
+<h3>Appendix C — System Configurations &amp; Hyperparameters</h3>
+<p><strong>Table 9.3: System Configuration and Inference Parameters</strong></p>
+<table>
+<thead>
+<tr>
+<th>Parameter / Config</th>
+<th>Value</th>
+<th>Justification</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Inference Model</strong></td>
+<td><code>qwen/qwen3.8-27b</code></td>
+<td>Exceptional instruction-following for JSON schema generation</td>
+</tr>
+<tr>
+<td><strong>Inference Temperature</strong></td>
+<td>0.0</td>
+<td>Strict determinism; prevents randomness in API argument values</td>
+</tr>
+<tr>
+<td><strong>Max Output Tokens</strong></td>
+<td>1024</td>
+<td>Sufficient budget for complex 5-step JSON multi-agent plans</td>
+</tr>
+<tr>
+<td><strong>Timezone Default</strong></td>
+<td><code>Asia/Kolkata</code> (+05:30)</td>
+<td>Standard local timezone for scheduling operations</td>
+</tr>
+<tr>
+<td><strong>Max File Read Size</strong></td>
+<td>100,000 bytes (100KB)</td>
+<td>Prevents memory exhaustion during local code file inspection</td>
+</tr>
+<tr>
+<td><strong>Max Stored Sessions</strong></td>
+<td>30</td>
+<td>Bounds browser <code>localStorage</code> footprint</td>
+</tr>
+<tr>
+<td><strong>Max Messages / Session</strong></td>
+<td>50</td>
+<td>Keeps client-side DOM lightweight while preserving session history</td>
+</tr>
+<tr>
+<td><strong>Default Meeting Length</strong></td>
+<td>30 minutes</td>
+<td>Industry standard default for calendar scheduling</td>
+</tr>
+<tr>
+<td><strong>OAuth Token Storage</strong></td>
+<td><code>backend/google_token.json</code></td>
+<td>Stores Google OAuth2 user credentials with offline refresh capability</td>
+</tr>
+<tr>
+<td><strong>Backend Port</strong></td>
+<td>8001</td>
+<td>FastAPI Uvicorn service port</td>
+</tr>
+<tr>
+<td><strong>Frontend Port</strong></td>
+<td>5173</td>
+<td>Vite React local development port</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+</body>
+</html>

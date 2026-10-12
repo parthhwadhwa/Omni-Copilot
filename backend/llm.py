@@ -12,10 +12,10 @@ Contract:
 import json
 import re
 from groq import Groq
-from config import GROQ_API_KEY
+from config import GROQ_API_KEY, GROQ_MODEL
 from agents import ALL_AGENTS
 
-MODEL = "llama-3.3-70b-versatile"
+MODEL = GROQ_MODEL
 MAX_TOKENS = 1024
 TEMPERATURE = 0  # strict — no randomness
 
@@ -249,7 +249,9 @@ def call_llm(prompt: str) -> dict:
                     "Output ONLY the JSON object. No explanation. No markdown."},
             ]
             return _call(correction_messages)
-        except Exception:
+        except Exception as retry_err:
+            print(f"[LLM Retry Error] {type(retry_err).__name__}: {retry_err}")
             return {"intent": "unknown", "steps": []}
-    except Exception:
+    except Exception as e:
+        print(f"[LLM Error] {type(e).__name__}: {e}")
         return {"intent": "unknown", "steps": []}

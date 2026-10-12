@@ -37,6 +37,7 @@ def _derive_sender_name(email_user: str) -> str:
 
 SENDER_NAME = os.environ.get("SENDER_NAME") or _derive_sender_name(EMAIL_USER)
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "")
+GROQ_MODEL = os.environ.get("GROQ_MODEL", "qwen/qwen3.8-27b")
 SLACK_WEBHOOK_URL = os.environ.get("SLACK_WEBHOOK_URL", "")
 DISCORD_WEBHOOK_URL = os.environ.get("DISCORD_WEBHOOK_URL", "")
 NOTION_TOKEN = os.environ.get("NOTION_TOKEN", "")

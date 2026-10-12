@@ -60,7 +60,11 @@ def agent_status():
     for name, cls in ALL_AGENTS.items():
         try:
             result = cls().handle("status", {})
-            statuses[name] = result.get("ok", False)
+            res_data = result.get("result")
+            if isinstance(res_data, dict) and "connected" in res_data:
+                statuses[name] = bool(res_data["connected"])
+            else:
+                statuses[name] = result.get("ok", False)
         except Exception:
             statuses[name] = False
     return {"agents": statuses}

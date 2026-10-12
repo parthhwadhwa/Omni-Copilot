@@ -134,7 +134,9 @@ class CodeAgent(BaseAgent):
             return {"error": str(e)}
 
     def action_list_files(self, directory: str = ".", extension: str = "",
-                          recursive: bool = False, limit: int = 50) -> list:
+                          recursive: bool = False, limit: int = 50, path: str = None) -> list:
+        if path and (directory == "." or not directory):
+            directory = path
         directory = _resolve_dir(directory)
         if not os.path.exists(directory):
             return [{"error": f"Directory not found: {directory}"}]
@@ -179,7 +181,9 @@ class CodeAgent(BaseAgent):
         return sorted(results, key=lambda x: x.get("name", ""))
 
     def action_search_in_files(self, query: str, directory: str = ".",
-                               extension: str = "", limit: int = 20) -> list:
+                               extension: str = "", limit: int = 20, path: str = None) -> list:
+        if path and (directory == "." or not directory):
+            directory = path
         directory = _resolve_dir(directory)
         if not os.path.exists(directory):
             return [{"error": f"Directory not found: {directory}"}]

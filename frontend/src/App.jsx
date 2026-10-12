@@ -4,7 +4,7 @@ import ChatArea from "./components/ChatArea";
 import InputBar from "./components/InputBar";
 import "./App.css";
 
-const API = "http://localhost:8001";
+const API = import.meta.env.VITE_API_URL || "http://localhost:8001";
 
 function newSession() {
   return { id: Date.now().toString(), title: "New Chat", messages: [], createdAt: Date.now() };
